@@ -7,6 +7,7 @@ export const INITIAL_SETTINGS: ConversationSettings = {
   groupAvatarInitials: 'SB',
   groupAvatarColor: '#E11D48',
   povParticipantId: 'char-maria', // Maria Isabella Santos POV
+  includePovAvatar: false,
   chatThemeColor: '#0A7CFF', // Standard vibrant iOS/Messenger blue
   previewWidth: 420,
   autoTimestampIntervalMinutes: 2,

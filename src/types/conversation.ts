@@ -54,6 +54,7 @@ export interface ConversationSettings {
   groupAvatarInitials?: string;
   groupAvatarColor?: string;
   povParticipantId: string;
+  includePovAvatar: boolean;
   chatThemeColor?: string; // Bubble color for POV owner, default #0084FF
   previewWidth: number; // e.g. 420
   autoTimestampIntervalMinutes: number; // default 2

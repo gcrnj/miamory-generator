@@ -135,6 +135,7 @@ export function ConversationPreview({
                       chatThemeColor={settings.chatThemeColor}
                       showReactionRow={exportSettings.includeReactions}
                       showTimestamps={exportSettings.includeTimestamps}
+                      showPovAvatar={settings.includePovAvatar}
                     />
                   </React.Fragment>
                 );

@@ -14,6 +14,7 @@ interface MessageBubbleProps {
   chatThemeColor?: string;
   showReactionRow?: boolean;
   showTimestamps?: boolean;
+  showPovAvatar?: boolean;
 }
 
 export function MessageBubble({
@@ -25,6 +26,7 @@ export function MessageBubble({
   chatThemeColor = '#0A7CFF',
   showReactionRow = true,
   showTimestamps = true,
+  showPovAvatar = false,
 }: MessageBubbleProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -60,30 +62,25 @@ export function MessageBubble({
   return (
     <div className={`flex flex-col my-1 w-full ${isPov ? 'items-end' : 'items-start'}`}>
       <div className={`flex items-start gap-2 max-w-[85%] ${isPov ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Avatar for non-POV: Shown beside the FIRST message in a consecutive group */}
-        {!isPov && (
+        {/* Incoming messages always show their sender avatar; the POV avatar is optional. */}
+        {(!isPov || showPovAvatar) && (
           <div className="w-8 h-8 shrink-0 select-none">
-            {isFirstInGroup ? (
-              sender?.avatarUrl && !imageError ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={sender.avatarUrl}
-                  alt={senderName}
-                  onError={() => setImageError(true)}
-                  className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shadow-sm"
-                />
-              ) : (
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm ring-1 ring-white/10"
-                  style={{ backgroundColor: avatarColor }}
-                  title={`${senderName} (${sender?.role || 'Member'})`}
-                >
-                  {initials}
-                </div>
-              )
+            {sender?.avatarUrl && !imageError ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={sender.avatarUrl}
+                alt={senderName}
+                onError={() => setImageError(true)}
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shadow-sm"
+              />
             ) : (
-              /* Spacer for consecutive grouped messages */
-              <div className="w-8 h-8" />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm ring-1 ring-white/10"
+                style={{ backgroundColor: avatarColor }}
+                title={`${senderName} (${sender?.role || 'Member'})`}
+              >
+                {initials}
+              </div>
             )}
           </div>
         )}
