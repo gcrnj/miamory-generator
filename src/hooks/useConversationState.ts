@@ -49,7 +49,15 @@ export function useConversationState() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.participants && Array.isArray(parsed.participants)) {
-          setParticipants(parsed.participants);
+          // Merge preset avatarUrl defaults if participant avatarUrl is empty
+          const mergedParticipants = parsed.participants.map((p: Participant) => {
+            const preset = PRESET_CHARACTERS.find((pre) => pre.id === p.id);
+            if (preset && !p.avatarUrl) {
+              return { ...p, avatarUrl: preset.avatarUrl, defaultAvatarUrl: preset.defaultAvatarUrl };
+            }
+            return p;
+          });
+          setParticipants(mergedParticipants);
         }
         if (parsed.settings) {
           setSettings((prev) => ({ ...prev, ...parsed.settings }));
@@ -417,7 +425,7 @@ export function useConversationState() {
 
   // Participant management
   const addParticipant = useCallback(
-    (name: string, role: string) => {
+    (name: string, role: string, avatarUrl?: string) => {
       recordHistory();
       const colors = ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#F97316'];
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -428,6 +436,7 @@ export function useConversationState() {
         isCustom: true,
         avatarColor: randomColor,
         nameColor: randomColor,
+        avatarUrl,
       };
       setParticipants((prev) => [...prev, newP]);
       return newP;

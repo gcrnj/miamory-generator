@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MessageItem, Participant } from '@/types/conversation';
 import { MessageReaction } from './MessageReaction';
 import { getInitials } from '@/utils/timeUtils';
@@ -26,6 +26,8 @@ export function MessageBubble({
   showReactionRow = true,
   showTimestamps = true,
 }: MessageBubbleProps) {
+  const [imageError, setImageError] = useState(false);
+
   const senderName = sender?.name || 'Unknown';
   const senderColor = sender?.nameColor || '#F472B6';
   const avatarColor = sender?.avatarColor || '#64748B';
@@ -57,17 +59,18 @@ export function MessageBubble({
 
   return (
     <div className={`flex flex-col my-1 w-full ${isPov ? 'items-end' : 'items-start'}`}>
-      <div className={`flex items-end gap-2 max-w-[85%] ${isPov ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Avatar for non-POV (show placeholder space if grouped to keep alignment) */}
+      <div className={`flex items-start gap-2 max-w-[85%] ${isPov ? 'flex-row-reverse' : 'flex-row'}`}>
+        {/* Avatar for non-POV: Shown beside the FIRST message in a consecutive group */}
         {!isPov && (
-          <div className="w-8 h-8 shrink-0 flex items-end">
-            {isLastInGroup ? (
-              sender?.avatarUrl ? (
+          <div className="w-8 h-8 shrink-0 select-none">
+            {isFirstInGroup ? (
+              sender?.avatarUrl && !imageError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={sender.avatarUrl}
                   alt={senderName}
-                  className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10"
+                  onError={() => setImageError(true)}
+                  className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shadow-sm"
                 />
               ) : (
                 <div
@@ -79,6 +82,7 @@ export function MessageBubble({
                 </div>
               )
             ) : (
+              /* Spacer for consecutive grouped messages */
               <div className="w-8 h-8" />
             )}
           </div>
@@ -86,7 +90,7 @@ export function MessageBubble({
 
         {/* Message Content Container */}
         <div className={`flex flex-col ${isPov ? 'items-end' : 'items-start'} min-w-0`}>
-          {/* Sender Name (Non-POV, first in group only) */}
+          {/* Sender Name (Non-POV, first message in group only) */}
           {!isPov && isFirstInGroup && (
             <div className="flex items-center gap-1.5 mb-1 pl-1">
               <span

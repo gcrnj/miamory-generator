@@ -5,6 +5,7 @@ export interface Participant {
   isCustom?: boolean;
   avatarColor?: string;
   avatarUrl?: string;
+  defaultAvatarUrl?: string;
   nameColor?: string;
 }
 

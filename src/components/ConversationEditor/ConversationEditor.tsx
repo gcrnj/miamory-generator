@@ -23,7 +23,7 @@ interface ConversationEditorProps {
   onUpdateSettings: (updates: Partial<ConversationSettings>) => void;
   onUpdateExportSettings: (updates: Partial<ExportSettings>) => void;
   onAutoGenerateTimestamps: () => void;
-  onAddParticipant: (name: string, role: string) => void;
+  onAddParticipant: (name: string, role: string, avatarUrl?: string) => void;
   onUpdateParticipant: (id: string, updates: Partial<Participant>) => void;
   onDeleteParticipant: (id: string) => void;
   onAddMessage: (afterIndex?: number) => void;

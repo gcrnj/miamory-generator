@@ -103,10 +103,10 @@ export function ConversationSettingsPanel({
       {/* Advanced Settings Drawer */}
       {isExpanded && (
         <div className="mt-3.5 pt-3.5 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {/* Group Avatar Initials / Color */}
+          {/* Group Avatar Initials, Color & Upload */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Group Avatar Initials
+              Group Avatar (Initials or Photo)
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -114,7 +114,8 @@ export function ConversationSettingsPanel({
                 maxLength={3}
                 value={settings.groupAvatarInitials || ''}
                 onChange={(e) => onUpdateSettings({ groupAvatarInitials: e.target.value })}
-                className="w-16 bg-slate-800 text-white text-xs rounded px-2 py-1.5 border border-slate-700 uppercase font-bold text-center"
+                className="w-14 bg-slate-800 text-white text-xs rounded px-2 py-1.5 border border-slate-700 uppercase font-bold text-center"
+                title="Initials"
               />
               <input
                 type="color"
@@ -123,6 +124,36 @@ export function ConversationSettingsPanel({
                 className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer"
                 title="Avatar Background Color"
               />
+              <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded border border-slate-700 transition-colors">
+                Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          onUpdateSettings({ groupAvatarUrl: reader.result });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+              {settings.groupAvatarUrl && (
+                <button
+                  type="button"
+                  onClick={() => onUpdateSettings({ groupAvatarUrl: undefined })}
+                  className="text-slate-500 hover:text-rose-400 text-xs"
+                  title="Remove group photo"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
 
