@@ -1,8 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { SystemEventItem, Participant, SystemEventType } from '@/types/conversation';
-import { Trash2, Copy, ArrowUp, ArrowDown, GripVertical, BellRing, Calendar } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  SystemEventItem,
+  Participant,
+  SystemEventType,
+} from "@/types/conversation";
+import {
+  Trash2,
+  Copy,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
+  BellRing,
+  Calendar,
+} from "lucide-react";
 
 interface SystemEventEditorItemProps {
   event: SystemEventItem;
@@ -23,12 +35,15 @@ interface SystemEventEditorItemProps {
   onDrop: (e: React.DragEvent, index: number) => void;
 }
 
-const EVENT_TYPE_PRESETS: Record<SystemEventType, (p1: string, p2: string) => string> = {
+const EVENT_TYPE_PRESETS: Record<
+  SystemEventType,
+  (p1: string, p2: string) => string
+> = {
   participant_added: (p1, p2) => `${p1} added ${p2} to the group.`,
   participant_left: (p1) => `${p1} left the group.`,
   name_changed: (p1) => `${p1} changed the group name.`,
   photo_changed: (p1) => `${p1} changed the group photo.`,
-  custom: () => '',
+  custom: () => "",
 };
 
 export function SystemEventEditorItem({
@@ -49,11 +64,13 @@ export function SystemEventEditorItem({
   onDragOver,
   onDrop,
 }: SystemEventEditorItemProps) {
-  const [showDateField, setShowDateField] = useState(Boolean(event.dateDivider));
+  const [showDateField, setShowDateField] = useState(
+    Boolean(event.dateDivider),
+  );
 
   const handleTypeChange = (type: SystemEventType) => {
-    const p1 = participants[0]?.name || 'Maria';
-    const p2 = participants[1]?.name || 'Gabo';
+    const p1 = participants[0]?.name || "Maria";
+    const p2 = participants[1]?.name || "Gabo";
     const preset = EVENT_TYPE_PRESETS[type](p1, p2);
     onUpdate(event.id, { eventType: type, text: preset || event.text });
   };
@@ -66,8 +83,8 @@ export function SystemEventEditorItem({
       onDrop={(e) => onDrop(e, index)}
       className={`group relative rounded-xl border transition-all ${
         isSelectedForExport
-          ? 'border-amber-500/60 bg-amber-950/10'
-          : 'border-slate-800/60 bg-slate-900/30 hover:border-slate-700'
+          ? "border-amber-500/60 bg-amber-950/10"
+          : "border-slate-800/60 bg-slate-900/30 hover:border-slate-700"
       }`}
     >
       {/* Optional Date Divider above */}
@@ -77,15 +94,22 @@ export function SystemEventEditorItem({
           <input
             type="text"
             value={event.dateDivider}
-            onChange={(e) => onUpdate(event.id, { dateDivider: e.target.value || undefined })}
+            onChange={(e) =>
+              onUpdate(event.id, { dateDivider: e.target.value || undefined })
+            }
             placeholder="Date separator"
             className="flex-1 bg-transparent text-amber-300 text-[11px] font-semibold focus:outline-none border-b border-amber-800/40 pb-0.5"
           />
           <button
             type="button"
-            onClick={() => { onUpdate(event.id, { dateDivider: undefined }); setShowDateField(false); }}
+            onClick={() => {
+              onUpdate(event.id, { dateDivider: undefined });
+              setShowDateField(false);
+            }}
             className="text-slate-600 hover:text-rose-400 text-[11px]"
-          >✕</button>
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -114,33 +138,59 @@ export function SystemEventEditorItem({
             </span>
             <select
               value={event.eventType}
-              onChange={(e) => handleTypeChange(e.target.value as SystemEventType)}
+              onChange={(e) =>
+                handleTypeChange(e.target.value as SystemEventType)
+              }
               className="flex-1 min-w-0 bg-transparent text-slate-300 text-[12px] focus:outline-none cursor-pointer appearance-none"
             >
-              <option value="participant_added" className="bg-slate-800">Participant Added</option>
-              <option value="participant_left" className="bg-slate-800">Participant Left</option>
-              <option value="name_changed" className="bg-slate-800">Name Changed</option>
-              <option value="photo_changed" className="bg-slate-800">Photo Changed</option>
-              <option value="custom" className="bg-slate-800">Custom Event</option>
+              <option value="participant_added" className="bg-slate-800">
+                Participant Added
+              </option>
+              <option value="participant_left" className="bg-slate-800">
+                Participant Left
+              </option>
+              <option value="name_changed" className="bg-slate-800">
+                Name Changed
+              </option>
+              <option value="photo_changed" className="bg-slate-800">
+                Photo Changed
+              </option>
+              <option value="custom" className="bg-slate-800">
+                Custom Event
+              </option>
             </select>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-0.5 shrink-0 text-slate-600">
-            <button type="button" onClick={() => onMoveUp(event.id)} disabled={index === 0}
-              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors">
+            <button
+              type="button"
+              onClick={() => onMoveUp(event.id)}
+              disabled={index === 0}
+              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors"
+            >
               <ArrowUp className="w-3 h-3" />
             </button>
-            <button type="button" onClick={() => onMoveDown(event.id)} disabled={index === totalItems - 1}
-              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors">
+            <button
+              type="button"
+              onClick={() => onMoveDown(event.id)}
+              disabled={index === totalItems - 1}
+              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors"
+            >
               <ArrowDown className="w-3 h-3" />
             </button>
-            <button type="button" onClick={() => onDuplicate(event.id)}
-              className="p-1 hover:text-amber-400 transition-colors">
+            <button
+              type="button"
+              onClick={() => onDuplicate(event.id)}
+              className="p-1 hover:text-amber-400 transition-colors"
+            >
               <Copy className="w-3 h-3" />
             </button>
-            <button type="button" onClick={() => onDelete(event.id)}
-              className="p-1 hover:text-rose-400 transition-colors">
+            <button
+              type="button"
+              onClick={() => onDelete(event.id)}
+              className="p-1 hover:text-rose-400 transition-colors"
+            >
               <Trash2 className="w-3 h-3" />
             </button>
           </div>
@@ -151,7 +201,7 @@ export function SystemEventEditorItem({
           type="text"
           value={event.text}
           onChange={(e) => onUpdate(event.id, { text: e.target.value })}
-          placeholder="e.g. Maria Isabella Santos added Tita Letty to the group."
+          placeholder="e.g. Maria added Tita Letty to the group."
           className="w-full bg-slate-950/80 text-amber-200/80 text-[13px] rounded-lg px-3 py-2 border border-slate-700/60 focus:outline-none focus:ring-1 focus:ring-amber-600/60 placeholder:text-slate-600"
         />
 
@@ -161,7 +211,10 @@ export function SystemEventEditorItem({
             {!event.dateDivider && (
               <button
                 type="button"
-                onClick={() => { setShowDateField(true); onUpdate(event.id, { dateDivider: 'Today' }); }}
+                onClick={() => {
+                  setShowDateField(true);
+                  onUpdate(event.id, { dateDivider: "Today" });
+                }}
                 className="hover:text-amber-400 transition-colors flex items-center gap-0.5"
               >
                 <Calendar className="w-2.5 h-2.5" /> Date separator
@@ -169,12 +222,18 @@ export function SystemEventEditorItem({
             )}
           </div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={() => onAddMessageBelow(index)}
-              className="hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors">
+            <button
+              type="button"
+              onClick={() => onAddMessageBelow(index)}
+              className="hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
+            >
               ↓ Msg
             </button>
-            <button type="button" onClick={() => onAddSystemEventBelow(index)}
-              className="hover:text-amber-400 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors">
+            <button
+              type="button"
+              onClick={() => onAddSystemEventBelow(index)}
+              className="hover:text-amber-400 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
+            >
               ↓ Evt
             </button>
           </div>

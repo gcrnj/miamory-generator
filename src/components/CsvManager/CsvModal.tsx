@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   FileSpreadsheet,
   Download,
@@ -12,14 +12,14 @@ import {
   AlertCircle,
   PlusCircle,
   RefreshCw,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   generateCsvTemplate,
   exportTimelineToCsv,
   downloadCsvFile,
   parseCsvToTimeline,
-} from '@/utils/csvUtils';
-import { TimelineItem, Participant } from '@/types/conversation';
+} from "@/utils/csvUtils";
+import { TimelineItem, Participant } from "@/types/conversation";
 
 interface CsvModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ interface CsvModalProps {
   onImportTimeline: (
     newTimeline: TimelineItem[],
     newParticipants: Participant[],
-    mode: 'replace' | 'append'
+    mode: "replace" | "append",
   ) => void;
 }
 
@@ -42,9 +42,11 @@ export function CsvModal({
   groupName,
   onImportTimeline,
 }: CsvModalProps) {
-  const [activeTab, setActiveTab] = useState<'template' | 'import' | 'export'>('template');
-  const [csvInput, setCsvInput] = useState('');
-  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
+  const [activeTab, setActiveTab] = useState<"template" | "import" | "export">(
+    "template",
+  );
+  const [csvInput, setCsvInput] = useState("");
+  const [importMode, setImportMode] = useState<"replace" | "append">("replace");
   const [copiedTemplate, setCopiedTemplate] = useState(false);
   const [parseResult, setParseResult] = useState<{
     messageCount: number;
@@ -59,7 +61,7 @@ export function CsvModal({
   if (!isOpen) return null;
 
   const handleDownloadTemplate = () => {
-    downloadCsvFile(templateCsv, 'miamory-conversation-template.csv');
+    downloadCsvFile(templateCsv, "miamory-conversation-template.csv");
   };
 
   const handleCopyTemplate = () => {
@@ -70,10 +72,10 @@ export function CsvModal({
 
   const handleExportCurrent = () => {
     const csvData = exportTimelineToCsv(timeline, participants);
-    const cleanName = (groupName || 'conversation')
+    const cleanName = (groupName || "conversation")
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     downloadCsvFile(csvData, `${cleanName}-${Date.now()}.csv`);
   };
 
@@ -84,13 +86,13 @@ export function CsvModal({
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result;
-      if (typeof text === 'string') {
+      if (typeof text === "string") {
         setCsvInput(text);
         validateCsvText(text);
       }
     };
     reader.readAsText(file);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const validateCsvText = (text: string) => {
@@ -100,18 +102,24 @@ export function CsvModal({
     }
 
     try {
-      const { timeline: parsedTimeline, newParticipants, errors } = parseCsvToTimeline(
-        text,
-        participants
-      );
+      const {
+        timeline: parsedTimeline,
+        newParticipants,
+        errors,
+      } = parseCsvToTimeline(text, participants);
 
       if (errors.length > 0) {
-        setParseResult({ messageCount: 0, eventCount: 0, newCharactersCount: 0, error: errors[0] });
+        setParseResult({
+          messageCount: 0,
+          eventCount: 0,
+          newCharactersCount: 0,
+          error: errors[0],
+        });
         return;
       }
 
-      const msgs = parsedTimeline.filter((it) => it.type === 'message').length;
-      const evts = parsedTimeline.filter((it) => it.type === 'system').length;
+      const msgs = parsedTimeline.filter((it) => it.type === "message").length;
+      const evts = parsedTimeline.filter((it) => it.type === "system").length;
 
       setParseResult({
         messageCount: msgs,
@@ -123,7 +131,7 @@ export function CsvModal({
         messageCount: 0,
         eventCount: 0,
         newCharactersCount: 0,
-        error: e?.message || 'Invalid CSV syntax',
+        error: e?.message || "Invalid CSV syntax",
       });
     }
   };
@@ -133,11 +141,11 @@ export function CsvModal({
 
     const { timeline: parsedTimeline, newParticipants } = parseCsvToTimeline(
       csvInput,
-      participants
+      participants,
     );
 
     if (parsedTimeline.length === 0) {
-      alert('No valid conversation rows found in the CSV.');
+      alert("No valid conversation rows found in the CSV.");
       return;
     }
 
@@ -155,7 +163,9 @@ export function CsvModal({
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">CSV Spreadsheet Manager</h2>
+              <h2 className="text-base font-bold text-white">
+                CSV Spreadsheet Manager
+              </h2>
               <p className="text-xs text-slate-400">
                 Compose dialogues in Excel / Google Sheets and import seamlessly
               </p>
@@ -175,11 +185,11 @@ export function CsvModal({
         <div className="px-5 pt-3 border-b border-slate-800/80 flex gap-2">
           <button
             type="button"
-            onClick={() => setActiveTab('template')}
+            onClick={() => setActiveTab("template")}
             className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 border-b-2 transition-colors ${
-              activeTab === 'template'
-                ? 'border-emerald-500 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === "template"
+                ? "border-emerald-500 text-emerald-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             <Download className="w-3.5 h-3.5" /> CSV Template
@@ -187,11 +197,11 @@ export function CsvModal({
 
           <button
             type="button"
-            onClick={() => setActiveTab('import')}
+            onClick={() => setActiveTab("import")}
             className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 border-b-2 transition-colors ${
-              activeTab === 'import'
-                ? 'border-emerald-500 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === "import"
+                ? "border-emerald-500 text-emerald-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             <Upload className="w-3.5 h-3.5" /> Import CSV
@@ -199,11 +209,11 @@ export function CsvModal({
 
           <button
             type="button"
-            onClick={() => setActiveTab('export')}
+            onClick={() => setActiveTab("export")}
             className={`pb-2.5 px-3 text-xs font-semibold flex items-center gap-1.5 border-b-2 transition-colors ${
-              activeTab === 'export'
-                ? 'border-emerald-500 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === "export"
+                ? "border-emerald-500 text-emerald-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             <FileText className="w-3.5 h-3.5" /> Export Current Chat
@@ -213,7 +223,7 @@ export function CsvModal({
         {/* Modal Body */}
         <div className="p-5 flex-1 overflow-y-auto space-y-4">
           {/* TAB 1: CSV TEMPLATE */}
-          {activeTab === 'template' && (
+          {activeTab === "template" && (
             <div className="space-y-4">
               <div className="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 text-xs text-slate-300 space-y-2">
                 <p className="font-semibold text-white flex items-center gap-1.5">
@@ -221,32 +231,51 @@ export function CsvModal({
                   Official Miamory CSV Format Guide
                 </p>
                 <p className="text-slate-400 leading-relaxed">
-                  Use this CSV structure to draft Facebook group conversations in Google Sheets or Excel:
+                  Use this CSV structure to draft Facebook group conversations
+                  in Google Sheets or Excel:
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
-                    <span className="text-emerald-400 font-bold block">type</span>
+                    <span className="text-emerald-400 font-bold block">
+                      type
+                    </span>
                     <span className="text-slate-400">message or system</span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
-                    <span className="text-blue-400 font-bold block">sender</span>
-                    <span className="text-slate-400">Character name / Actor</span>
+                    <span className="text-blue-400 font-bold block">
+                      sender
+                    </span>
+                    <span className="text-slate-400">
+                      Character name / Actor
+                    </span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
                     <span className="text-amber-400 font-bold block">text</span>
-                    <span className="text-slate-400">Dialogue or notification</span>
+                    <span className="text-slate-400">
+                      Dialogue or notification
+                    </span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
-                    <span className="text-purple-400 font-bold block">timestamp</span>
-                    <span className="text-slate-400">e.g. 9:41 AM (or blank)</span>
+                    <span className="text-purple-400 font-bold block">
+                      timestamp
+                    </span>
+                    <span className="text-slate-400">
+                      e.g. 9:41 AM (or blank)
+                    </span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
-                    <span className="text-pink-400 font-bold block">reactions</span>
+                    <span className="text-pink-400 font-bold block">
+                      reactions
+                    </span>
                     <span className="text-slate-400">e.g. ❤️:3, 😂:2</span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
-                    <span className="text-cyan-400 font-bold block">date_divider</span>
-                    <span className="text-slate-400">e.g. Today, Yesterday</span>
+                    <span className="text-cyan-400 font-bold block">
+                      date_divider
+                    </span>
+                    <span className="text-slate-400">
+                      e.g. Today, Yesterday
+                    </span>
                   </div>
                 </div>
               </div>
@@ -289,7 +318,7 @@ export function CsvModal({
           )}
 
           {/* TAB 2: IMPORT CSV */}
-          {activeTab === 'import' && (
+          {activeTab === "import" && (
             <div className="space-y-4">
               {/* File upload bar */}
               <div className="flex items-center justify-between gap-3 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
@@ -306,7 +335,8 @@ export function CsvModal({
                   onClick={() => fileInputRef.current?.click()}
                   className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
                 >
-                  <Upload className="w-3.5 h-3.5 text-emerald-400" /> Browse File
+                  <Upload className="w-3.5 h-3.5 text-emerald-400" /> Browse
+                  File
                 </button>
                 <input
                   ref={fileInputRef}
@@ -329,7 +359,7 @@ export function CsvModal({
                     setCsvInput(e.target.value);
                     validateCsvText(e.target.value);
                   }}
-                  placeholder="type,sender,text,timestamp,reactions,date_divider&#10;message,Maria Isabella Santos,Hello everyone!,9:41 AM,❤️:2,Today"
+                  placeholder="type,sender,text,timestamp,reactions,date_divider&#10;message,Maria,Hello everyone!,9:41 AM,❤️:2,Today"
                   className="w-full bg-slate-950 font-mono text-xs text-slate-200 p-3 rounded-xl border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-y leading-relaxed"
                 />
               </div>
@@ -339,8 +369,8 @@ export function CsvModal({
                 <div
                   className={`p-3 rounded-xl border text-xs flex items-center justify-between ${
                     parseResult.error
-                      ? 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-                      : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
+                      ? "bg-rose-950/40 border-rose-800/60 text-rose-300"
+                      : "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
                   }`}
                 >
                   {parseResult.error ? (
@@ -350,11 +380,15 @@ export function CsvModal({
                     </div>
                   ) : (
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-semibold">Parsed Successfully:</span>
+                      <span className="font-semibold">
+                        Parsed Successfully:
+                      </span>
                       <span>💬 {parseResult.messageCount} Messages</span>
                       <span>🔔 {parseResult.eventCount} System Events</span>
                       {parseResult.newCharactersCount > 0 && (
-                        <span>✨ {parseResult.newCharactersCount} New Characters</span>
+                        <span>
+                          ✨ {parseResult.newCharactersCount} New Characters
+                        </span>
                       )}
                     </div>
                   )}
@@ -369,8 +403,8 @@ export function CsvModal({
                     <input
                       type="radio"
                       name="importMode"
-                      checked={importMode === 'replace'}
-                      onChange={() => setImportMode('replace')}
+                      checked={importMode === "replace"}
+                      onChange={() => setImportMode("replace")}
                       className="text-emerald-500 focus:ring-0"
                     />
                     Replace All
@@ -379,8 +413,8 @@ export function CsvModal({
                     <input
                       type="radio"
                       name="importMode"
-                      checked={importMode === 'append'}
-                      onChange={() => setImportMode('append')}
+                      checked={importMode === "append"}
+                      onChange={() => setImportMode("append")}
                       className="text-emerald-500 focus:ring-0"
                     />
                     Append to Bottom
@@ -401,14 +435,16 @@ export function CsvModal({
           )}
 
           {/* TAB 3: EXPORT CURRENT CONVERSATION */}
-          {activeTab === 'export' && (
+          {activeTab === "export" && (
             <div className="space-y-4">
               <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 text-xs text-slate-300 space-y-2">
                 <p className="font-semibold text-white">
                   Export Active Conversation ({timeline.length} items)
                 </p>
                 <p className="text-slate-400 leading-relaxed">
-                  Exporting creates a standard CSV file matching our template format. You can open it in Excel, Google Sheets, or share it with other scriptwriters.
+                  Exporting creates a standard CSV file matching our template
+                  format. You can open it in Excel, Google Sheets, or share it
+                  with other scriptwriters.
                 </p>
               </div>
 

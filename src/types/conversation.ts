@@ -18,7 +18,7 @@ export interface ReactionItem {
 
 export interface MessageItem {
   id: string;
-  type: 'message';
+  type: "message";
   senderId: string;
   text: string;
   timestamp: string; // e.g. "9:41 AM"
@@ -28,19 +28,19 @@ export interface MessageItem {
 }
 
 export type SystemEventType =
-  | 'participant_added'
-  | 'participant_left'
-  | 'name_changed'
-  | 'photo_changed'
-  | 'custom';
+  | "participant_added"
+  | "participant_left"
+  | "name_changed"
+  | "photo_changed"
+  | "custom";
 
 export interface SystemEventItem {
   id: string;
-  type: 'system';
+  type: "system";
   eventType: SystemEventType;
   actorId?: string;
   targetId?: string;
-  text: string; // e.g. "Maria Isabella Santos added Tita Letty."
+  text: string; // e.g. "Maria added Tita Letty."
   timestamp?: string;
   dateDivider?: string;
 }

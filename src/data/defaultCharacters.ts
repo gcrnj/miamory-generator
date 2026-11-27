@@ -5,7 +5,7 @@ export const PRESET_CHARACTERS: (Participant & {
 })[] = [
   {
     id: "char-maria",
-    name: "Maria Isabella Santos",
+    name: "Maria",
     role: "Bride",
     avatarColor: "#EC4899", // Pink
     nameColor: "#F472B6",
@@ -14,7 +14,7 @@ export const PRESET_CHARACTERS: (Participant & {
   },
   {
     id: "char-gabo",
-    name: 'Gabriel "Gabo" Bautista',
+    name: "Gabo",
     role: "Groom",
     avatarColor: "#3B82F6", // Blue
     nameColor: "#60A5FA",

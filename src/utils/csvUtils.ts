@@ -4,23 +4,28 @@ import {
   MessageItem,
   SystemEventItem,
   ReactionItem,
-} from '@/types/conversation';
-import { addMinutesToTimeString } from './timeUtils';
+} from "@/types/conversation";
+import { addMinutesToTimeString } from "./timeUtils";
 
 export const CSV_HEADERS = [
-  'type',
-  'sender',
-  'text',
-  'timestamp',
-  'reactions',
-  'date_divider',
+  "type",
+  "sender",
+  "text",
+  "timestamp",
+  "reactions",
+  "date_divider",
 ];
 
 // RFC 4180 compliant CSV cell escaper
 export function escapeCsvCell(value: string | undefined | null): string {
-  if (value === undefined || value === null) return '';
+  if (value === undefined || value === null) return "";
   const str = String(value);
-  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+  if (
+    str.includes(",") ||
+    str.includes('"') ||
+    str.includes("\n") ||
+    str.includes("\r")
+  ) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -29,77 +34,82 @@ export function escapeCsvCell(value: string | undefined | null): string {
 // Generate the official CSV template with comments and realistic wedding sample data
 export function generateCsvTemplate(): string {
   const rows = [
-    CSV_HEADERS.join(','),
-    'system,"Maria Isabella Santos","Maria Isabella Santos added Tita Letty to the group.","","",Today',
-    'message,"Maria Isabella Santos","Good morning everyone! Sending the final reception seating arrangement today. Please strictly no more last-minute additions po 🙏","9:41 AM","❤️:3, 🙏:2",',
-    'message,"Gabriel ""Gabo"" Bautista","Yes please po, 150 pax na yung venue max limit! Super siksik na if we add more.","9:42 AM","👍:1",',
+    CSV_HEADERS.join(","),
+    'system,"Maria","Maria added Tita Letty to the group.","","",Today',
+    'message,"Maria","Good morning everyone! Sending the final reception seating arrangement today. Please strictly no more last-minute additions po 🙏","9:41 AM","❤️:3, 🙏:2",',
+    'message,"Gabo ""Gabo"" Bautista","Yes please po, 150 pax na yung venue max limit! Super siksik na if we add more.","9:42 AM","👍:1",',
     'message,"Tita Letty","Hija @Maria! Pwede bang isingit si Tito Boyet and his 4 kids galing Canada? Kararating lang nila kagabi, nakakahiya naman kung hindi invite!","9:44 AM","😭:2, 😂:1",',
     'message,"Elena Reyes","Letty naman... Sabi ko na nga ba e 😂 Saan natin uupuin sila Boyet? Sa stage?","9:45 AM","😂:4",',
     'message,"Tita Vicky","Kung kasama si Boyet, dapat kasama rin si Mareng Susan! Ninang siya ni Gabo sa binyag!","9:47 AM","🤦‍♂️:2",',
-    'system,"Gabriel ""Gabo"" Bautista","Gabriel ""Gabo"" Bautista left the group.","","",',
-    'message,"Maria Isabella Santos","GABOOOO BUMALIK KA DITO 😭😭😭","9:48 AM","😂:5",',
-    'system,"Maria Isabella Santos","Maria Isabella Santos added Gabriel ""Gabo"" Bautista to the group.","","",',
+    'system,"Gabo ""Gabo"" Bautista","Gabo ""Gabo"" Bautista left the group.","","",',
+    'message,"Maria","GABOOOO BUMALIK KA DITO 😭😭😭","9:48 AM","😂:5",',
+    'system,"Maria","Maria added Gabo ""Gabo"" Bautista to the group.","","",',
     'message,"Corazon ""Cora"" Mendoza","Mga Tita, relax! Nag-order na ako ng 2 extra lechon para walang magtampo. Kasya tayong lahat!","9:50 AM","❤️:6, 🎉:4",',
-    'message,"Maria Isabella Santos","Aww thank you Mom Cora! Best mother-in-law ever! 💕 Love you all!","9:51 AM","🥰:3",',
+    'message,"Maria","Aww thank you Mom Cora! Best mother-in-law ever! 💕 Love you all!","9:51 AM","🥰:3",',
   ];
 
-  return rows.join('\r\n');
+  return rows.join("\r\n");
 }
 
 // Export current conversation items to CSV format
 export function exportTimelineToCsv(
   timeline: TimelineItem[],
-  participants: Participant[]
+  participants: Participant[],
 ): string {
   const pMap = new Map<string, Participant>();
   participants.forEach((p) => pMap.set(p.id, p));
 
-  const rows: string[] = [CSV_HEADERS.join(',')];
+  const rows: string[] = [CSV_HEADERS.join(",")];
 
   for (const item of timeline) {
-    if (item.type === 'system') {
+    if (item.type === "system") {
       const sys = item as SystemEventItem;
-      const actor = sys.actorId ? pMap.get(sys.actorId)?.name || '' : '';
+      const actor = sys.actorId ? pMap.get(sys.actorId)?.name || "" : "";
       rows.push(
         [
-          'system',
+          "system",
           escapeCsvCell(actor),
           escapeCsvCell(sys.text),
-          escapeCsvCell(sys.timestamp || ''),
-          '',
-          escapeCsvCell(sys.dateDivider || ''),
-        ].join(',')
+          escapeCsvCell(sys.timestamp || ""),
+          "",
+          escapeCsvCell(sys.dateDivider || ""),
+        ].join(","),
       );
     } else {
       const msg = item as MessageItem;
-      const sender = pMap.get(msg.senderId)?.name || 'Unknown';
+      const sender = pMap.get(msg.senderId)?.name || "Unknown";
       const reactionsStr = msg.reactions
-        ? msg.reactions.map((r) => `${r.emoji}:${r.count}`).join(', ')
-        : '';
+        ? msg.reactions.map((r) => `${r.emoji}:${r.count}`).join(", ")
+        : "";
 
       rows.push(
         [
-          'message',
+          "message",
           escapeCsvCell(sender),
           escapeCsvCell(msg.text),
-          escapeCsvCell(msg.timestamp || ''),
+          escapeCsvCell(msg.timestamp || ""),
           escapeCsvCell(reactionsStr),
-          escapeCsvCell(msg.dateDivider || ''),
-        ].join(',')
+          escapeCsvCell(msg.dateDivider || ""),
+        ].join(","),
       );
     }
   }
 
-  return rows.join('\r\n');
+  return rows.join("\r\n");
 }
 
 // Download string content as a CSV file in browser
-export function downloadCsvFile(content: string, filename = 'miamory-conversation.csv') {
-  const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+export function downloadCsvFile(
+  content: string,
+  filename = "miamory-conversation.csv",
+) {
+  const blob = new Blob(["\uFEFF" + content], {
+    type: "text/csv;charset=utf-8;",
+  });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -110,10 +120,10 @@ export function downloadCsvFile(content: string, filename = 'miamory-conversatio
 export function parseCsvRows(csvText: string): string[][] {
   const rows: string[][] = [];
   let currentRow: string[] = [];
-  let currentField = '';
+  let currentField = "";
   let insideQuotes = false;
 
-  const text = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const text = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
@@ -126,17 +136,17 @@ export function parseCsvRows(csvText: string): string[][] {
       } else {
         insideQuotes = !insideQuotes;
       }
-    } else if (char === ',' && !insideQuotes) {
+    } else if (char === "," && !insideQuotes) {
       currentRow.push(currentField);
-      currentField = '';
-    } else if (char === '\n' && !insideQuotes) {
+      currentField = "";
+    } else if (char === "\n" && !insideQuotes) {
       currentRow.push(currentField);
       // Only push non-empty rows
       if (currentRow.some((field) => field.trim().length > 0)) {
         rows.push(currentRow);
       }
       currentRow = [];
-      currentField = '';
+      currentField = "";
     } else {
       currentField += char;
     }
@@ -157,11 +167,14 @@ export function parseCsvRows(csvText: string): string[][] {
 export function parseReactionsString(rxStr: string): ReactionItem[] {
   if (!rxStr || !rxStr.trim()) return [];
 
-  const parts = rxStr.split(/[,+]/).map((p) => p.trim()).filter(Boolean);
+  const parts = rxStr
+    .split(/[,+]/)
+    .map((p) => p.trim())
+    .filter(Boolean);
   const reactions: ReactionItem[] = [];
 
   for (const part of parts) {
-    const colonIdx = part.lastIndexOf(':');
+    const colonIdx = part.lastIndexOf(":");
     let emoji = part;
     let count = 1;
 
@@ -189,8 +202,8 @@ export function parseReactionsString(rxStr: string): ReactionItem[] {
 export function parseCsvToTimeline(
   csvText: string,
   existingParticipants: Participant[],
-  defaultStartTimestamp = '9:41 AM',
-  intervalMinutes = 2
+  defaultStartTimestamp = "9:41 AM",
+  intervalMinutes = 2,
 ): {
   timeline: TimelineItem[];
   newParticipants: Participant[];
@@ -200,16 +213,20 @@ export function parseCsvToTimeline(
   const errors: string[] = [];
 
   if (rows.length === 0) {
-    return { timeline: [], newParticipants: [], errors: ['CSV content is empty.'] };
+    return {
+      timeline: [],
+      newParticipants: [],
+      errors: ["CSV content is empty."],
+    };
   }
 
   // Detect header row
   const firstRow = rows[0].map((c) => c.trim().toLowerCase());
   const hasHeader =
-    firstRow.includes('sender') ||
-    firstRow.includes('type') ||
-    firstRow.includes('message') ||
-    firstRow.includes('text');
+    firstRow.includes("sender") ||
+    firstRow.includes("type") ||
+    firstRow.includes("message") ||
+    firstRow.includes("text");
 
   const dataRows = hasHeader ? rows.slice(1) : rows;
 
@@ -222,12 +239,18 @@ export function parseCsvToTimeline(
   let dateDividerIdx = 5;
 
   if (hasHeader) {
-    typeIdx = firstRow.findIndex((h) => h === 'type');
-    senderIdx = firstRow.findIndex((h) => h === 'sender' || h === 'sender_or_actor' || h === 'character');
-    textIdx = firstRow.findIndex((h) => h === 'text' || h === 'message' || h === 'message_or_event_text');
-    timeIdx = firstRow.findIndex((h) => h === 'timestamp' || h === 'time');
-    rxIdx = firstRow.findIndex((h) => h === 'reactions' || h === 'reaction');
-    dateDividerIdx = firstRow.findIndex((h) => h === 'date_divider' || h === 'date');
+    typeIdx = firstRow.findIndex((h) => h === "type");
+    senderIdx = firstRow.findIndex(
+      (h) => h === "sender" || h === "sender_or_actor" || h === "character",
+    );
+    textIdx = firstRow.findIndex(
+      (h) => h === "text" || h === "message" || h === "message_or_event_text",
+    );
+    timeIdx = firstRow.findIndex((h) => h === "timestamp" || h === "time");
+    rxIdx = firstRow.findIndex((h) => h === "reactions" || h === "reaction");
+    dateDividerIdx = firstRow.findIndex(
+      (h) => h === "date_divider" || h === "date",
+    );
 
     // Fallbacks if not explicitly matching
     if (typeIdx === -1) typeIdx = 0;
@@ -241,28 +264,40 @@ export function parseCsvToTimeline(
   const participantsList = [...existingParticipants];
   const newParticipants: Participant[] = [];
 
-  // Match helper: matches name or nickname (e.g. "Gabo" matches "Gabriel 'Gabo' Bautista")
+  // Match helper: matches name or nickname (e.g. "Gabo" matches "Gabo 'Gabo' Bautista")
   const findOrCreateParticipant = (nameRaw: string): Participant => {
     const raw = nameRaw.trim();
     if (!raw) return participantsList[0];
 
-    const cleanRaw = raw.toLowerCase().replace(/["']/g, '');
+    const cleanRaw = raw.toLowerCase().replace(/["']/g, "");
 
     const found = participantsList.find((p) => {
-      const pClean = p.name.toLowerCase().replace(/["']/g, '');
-      return pClean === cleanRaw || pClean.includes(cleanRaw) || cleanRaw.includes(pClean);
+      const pClean = p.name.toLowerCase().replace(/["']/g, "");
+      return (
+        pClean === cleanRaw ||
+        pClean.includes(cleanRaw) ||
+        cleanRaw.includes(pClean)
+      );
     });
 
     if (found) return found;
 
     // Create a new participant
-    const colors = ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#F97316'];
+    const colors = [
+      "#EC4899",
+      "#3B82F6",
+      "#10B981",
+      "#F59E0B",
+      "#8B5CF6",
+      "#06B6D4",
+      "#F97316",
+    ];
     const color = colors[participantsList.length % colors.length];
 
     const newP: Participant = {
       id: `char-csv-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: raw,
-      role: 'Participant',
+      role: "Participant",
       isCustom: true,
       avatarColor: color,
       nameColor: color,
@@ -277,51 +312,51 @@ export function parseCsvToTimeline(
   const timeline: TimelineItem[] = [];
 
   dataRows.forEach((row, rowIdx) => {
-    const rawType = (row[typeIdx] || '').trim().toLowerCase();
-    const rawSender = (row[senderIdx] || '').trim();
-    const rawText = (row[textIdx] || '').trim();
-    const rawTime = (row[timeIdx] || '').trim();
-    const rawReactions = (row[rxIdx] || '').trim();
-    const rawDateDivider = (row[dateDividerIdx] || '').trim();
+    const rawType = (row[typeIdx] || "").trim().toLowerCase();
+    const rawSender = (row[senderIdx] || "").trim();
+    const rawText = (row[textIdx] || "").trim();
+    const rawTime = (row[timeIdx] || "").trim();
+    const rawReactions = (row[rxIdx] || "").trim();
+    const rawDateDivider = (row[dateDividerIdx] || "").trim();
 
     // If completely empty row, skip
     if (!rawType && !rawSender && !rawText) return;
 
     // Determine type: message or system
     const isSystem =
-      rawType === 'system' ||
-      rawType === 'event' ||
+      rawType === "system" ||
+      rawType === "event" ||
       (!rawSender && rawText) ||
-      rawText.toLowerCase().includes('added') ||
-      rawText.toLowerCase().includes('left the group') ||
-      rawText.toLowerCase().includes('changed the group');
+      rawText.toLowerCase().includes("added") ||
+      rawText.toLowerCase().includes("left the group") ||
+      rawText.toLowerCase().includes("changed the group");
 
     if (isSystem) {
       const actor = rawSender ? findOrCreateParticipant(rawSender) : undefined;
-      let eventType: SystemEventItem['eventType'] = 'custom';
+      let eventType: SystemEventItem["eventType"] = "custom";
       const textLower = rawText.toLowerCase();
 
-      if (textLower.includes('added') || textLower.includes('joined')) {
-        eventType = 'participant_added';
-      } else if (textLower.includes('left')) {
-        eventType = 'participant_left';
-      } else if (textLower.includes('name')) {
-        eventType = 'name_changed';
-      } else if (textLower.includes('photo')) {
-        eventType = 'photo_changed';
+      if (textLower.includes("added") || textLower.includes("joined")) {
+        eventType = "participant_added";
+      } else if (textLower.includes("left")) {
+        eventType = "participant_left";
+      } else if (textLower.includes("name")) {
+        eventType = "name_changed";
+      } else if (textLower.includes("photo")) {
+        eventType = "photo_changed";
       }
 
       timeline.push({
         id: `evt-csv-${Date.now()}-${rowIdx}-${Math.random().toString(36).slice(2, 5)}`,
-        type: 'system',
+        type: "system",
         eventType,
         actorId: actor?.id,
-        text: rawText || 'Group event occurred.',
+        text: rawText || "Group event occurred.",
         timestamp: rawTime || undefined,
         dateDivider: rawDateDivider || undefined,
       });
     } else {
-      const sender = findOrCreateParticipant(rawSender || 'Maria Isabella Santos');
+      const sender = findOrCreateParticipant(rawSender || "Maria");
       const timeToUse = rawTime || currentTime;
 
       // Advance time for next auto timestamp
@@ -331,7 +366,7 @@ export function parseCsvToTimeline(
 
       timeline.push({
         id: `msg-csv-${Date.now()}-${rowIdx}-${Math.random().toString(36).slice(2, 5)}`,
-        type: 'message',
+        type: "message",
         senderId: sender.id,
         text: rawText,
         timestamp: timeToUse,
