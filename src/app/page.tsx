@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { ConversationEditor } from '@/components/ConversationEditor/ConversationEditor';
 import { ConversationPreview } from '@/components/ConversationPreview/ConversationPreview';
 import { CsvModal } from '@/components/CsvManager/CsvModal';
+import { ExportBar } from '@/components/ExportControls/ExportBar';
 
 export default function Home() {
   const {
@@ -110,7 +111,7 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Scrollable preview area — canvas grows to full height so export captures everything */}
+          {/* Scrollable preview area */}
           <div className="flex-1 min-h-0 overflow-y-auto">
             <ConversationPreview
               timeline={timeline}
@@ -121,15 +122,10 @@ export default function Home() {
             />
           </div>
 
-          {/* Sticky Export Bar */}
           <ExportBar
             exportSettings={exportSettings}
-            onUpdateExportSettings={(updates) =>
-              setExportSettings((prev) => ({ ...prev, ...updates }))
-            }
             previewRef={previewRef}
             groupName={settings.groupName}
-            totalItems={timeline.length}
           />
         </section>
       </main>

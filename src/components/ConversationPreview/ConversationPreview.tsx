@@ -55,11 +55,10 @@ export function ConversationPreview({
   return (
     <div className="flex flex-col items-center justify-start w-full p-4 md:p-6">
       {/* Container with exact background color #242832 */}
-      {/* NOTE: No overflow-hidden here — let the canvas grow to full height so export captures everything */}
       <div
         ref={previewRef}
         id="miamory-preview-canvas"
-        className="w-full relative shadow-2xl rounded-2xl border border-white/10 transition-all duration-200"
+        className="w-full h-[640px] max-h-[calc(100vh-7rem)] min-h-[360px] relative flex flex-col overflow-hidden shadow-2xl rounded-2xl border border-white/10 transition-all duration-200"
         style={{
           maxWidth: `${settings.previewWidth || 420}px`,
           backgroundColor: '#242832', // EXACT REQUIRED BACKGROUND COLOR
@@ -72,71 +71,76 @@ export function ConversationPreview({
         )}
 
         {/* Conversation Body */}
-        <div className="p-3.5 space-y-1 min-h-[360px] flex flex-col justify-start">
-          {filteredTimeline.length === 0 ? (
-            <div className="flex flex-col items-center justify-center my-auto py-16 text-center text-gray-500">
-              <span className="text-3xl mb-2">💬</span>
-              <p className="text-sm font-medium">No messages to display</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Add messages or load the sample from the editor.
-              </p>
-            </div>
-          ) : (
-            filteredTimeline.map((item, index) => {
-              // Date divider
-              const showDateDivider = item.dateDivider;
+        <div
+          data-preview-scroll-viewport
+          className="flex-1 min-h-0 overflow-y-auto p-3.5"
+        >
+          <div data-preview-scroll-content className="min-h-full flex flex-col space-y-1">
+            {filteredTimeline.length === 0 ? (
+              <div className="flex flex-col items-center justify-center my-auto py-16 text-center text-gray-500">
+                <span className="text-3xl mb-2">💬</span>
+                <p className="text-sm font-medium">No messages to display</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Add messages or load the sample from the editor.
+                </p>
+              </div>
+            ) : (
+              filteredTimeline.map((item, index) => {
+                // Date divider
+                const showDateDivider = item.dateDivider;
 
-              if (item.type === 'system') {
-                const sysEvent = item as SystemEventItem;
+                if (item.type === 'system') {
+                  const sysEvent = item as SystemEventItem;
+                  return (
+                    <React.Fragment key={sysEvent.id}>
+                      {showDateDivider && <DateSeparator date={item.dateDivider!} />}
+                      <SystemNotification event={sysEvent} />
+                    </React.Fragment>
+                  );
+                }
+
+                const msg = item as MessageItem;
+                const isPov = msg.senderId === settings.povParticipantId;
+                const sender = participantsMap.get(msg.senderId);
+
+                // Check consecutive sender grouping
+                const prevItem = index > 0 ? filteredTimeline[index - 1] : null;
+                const nextItem =
+                  index < filteredTimeline.length - 1 ? filteredTimeline[index + 1] : null;
+
+                const isPrevSameSender =
+                  prevItem &&
+                  prevItem.type === 'message' &&
+                  (prevItem as MessageItem).senderId === msg.senderId &&
+                  !msg.dateDivider;
+
+                const isNextSameSender =
+                  nextItem &&
+                  nextItem.type === 'message' &&
+                  (nextItem as MessageItem).senderId === msg.senderId &&
+                  !(nextItem as MessageItem).dateDivider;
+
+                const isFirstInGroup = !isPrevSameSender;
+                const isLastInGroup = !isNextSameSender;
+
                 return (
-                  <React.Fragment key={sysEvent.id}>
-                    {showDateDivider && <DateSeparator date={item.dateDivider!} />}
-                    <SystemNotification event={sysEvent} />
+                  <React.Fragment key={msg.id}>
+                    {showDateDivider && <DateSeparator date={msg.dateDivider!} />}
+                    <MessageBubble
+                      message={msg}
+                      sender={sender}
+                      isPov={isPov}
+                      isFirstInGroup={isFirstInGroup}
+                      isLastInGroup={isLastInGroup}
+                      chatThemeColor={settings.chatThemeColor}
+                      showReactionRow={exportSettings.includeReactions}
+                      showTimestamps={exportSettings.includeTimestamps}
+                    />
                   </React.Fragment>
                 );
-              }
-
-              const msg = item as MessageItem;
-              const isPov = msg.senderId === settings.povParticipantId;
-              const sender = participantsMap.get(msg.senderId);
-
-              // Check consecutive sender grouping
-              const prevItem = index > 0 ? filteredTimeline[index - 1] : null;
-              const nextItem =
-                index < filteredTimeline.length - 1 ? filteredTimeline[index + 1] : null;
-
-              const isPrevSameSender =
-                prevItem &&
-                prevItem.type === 'message' &&
-                (prevItem as MessageItem).senderId === msg.senderId &&
-                !msg.dateDivider;
-
-              const isNextSameSender =
-                nextItem &&
-                nextItem.type === 'message' &&
-                (nextItem as MessageItem).senderId === msg.senderId &&
-                !(nextItem as MessageItem).dateDivider;
-
-              const isFirstInGroup = !isPrevSameSender;
-              const isLastInGroup = !isNextSameSender;
-
-              return (
-                <React.Fragment key={msg.id}>
-                  {showDateDivider && <DateSeparator date={msg.dateDivider!} />}
-                  <MessageBubble
-                    message={msg}
-                    sender={sender}
-                    isPov={isPov}
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
-                    chatThemeColor={settings.chatThemeColor}
-                    showReactionRow={exportSettings.includeReactions}
-                    showTimestamps={exportSettings.includeTimestamps}
-                  />
-                </React.Fragment>
-              );
-            })
-          )}
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

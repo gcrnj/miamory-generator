@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ExportSettings, TimelineItem } from '@/types/conversation';
 import { Download, Sliders, CheckCircle, Loader2 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { capturePreviewPng } from './capturePreviewPng';
 
 interface ExportControlsProps {
   exportSettings: ExportSettings;
@@ -24,7 +24,8 @@ export function ExportControls({
   const [exportSuccess, setExportSuccess] = useState(false);
 
   const handleDownloadPng = async () => {
-    if (!previewRef.current) return;
+    const preview = previewRef.current;
+    if (!preview) return;
 
     try {
       setIsExporting(true);
@@ -33,17 +34,10 @@ export function ExportControls({
       // Brief delay to allow any pending DOM updates / layouts to settle
       await new Promise((resolve) => setTimeout(resolve, 150));
 
-      const dataUrl = await toPng(previewRef.current, {
-        cacheBust: true,
-        pixelRatio: exportSettings.pixelRatio,
-        backgroundColor: '#242832', // EXACT REQUIRED COLOR
-        style: {
-          margin: '0',
-          borderRadius: '0', // Clean square edges for exported image
-          boxShadow: 'none',
-          border: 'none',
-        },
-      });
+      const dataUrl = await capturePreviewPng(
+        preview,
+        exportSettings.pixelRatio,
+      );
 
       const cleanGroupName = (groupName || 'miamory-chat')
         .toLowerCase()
