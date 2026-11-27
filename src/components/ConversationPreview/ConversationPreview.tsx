@@ -145,6 +145,7 @@ export function ConversationPreview({
                       showReactionRow={exportSettings.includeReactions}
                       showTimestamps={exportSettings.includeTimestamps}
                       showPovAvatar={settings.includePovAvatar}
+                      showSenderNames={exportSettings.includeSenderNames}
                     />
                   </React.Fragment>
                 );

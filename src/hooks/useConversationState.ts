@@ -29,6 +29,7 @@ export function useConversationState() {
   const [exportSettings, setExportSettings] = useState<ExportSettings>({
     pixelRatio: 2,
     includeHeader: true,
+    includeSenderNames: true,
     includeReactions: true,
     includeSystemEvents: true,
     includeTimestamps: true,

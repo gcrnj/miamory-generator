@@ -128,8 +128,8 @@ export function ExportControls({
         </button>
       </div>
 
-      {/* Component Toggles: Header, Reactions, System Events, Timestamps */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+      {/* Component Toggles: Header, Sender Names, Reactions, System Events, Timestamps */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 text-xs">
         <label className="flex items-center gap-2 bg-slate-800/60 p-2 rounded border border-slate-800 hover:border-slate-700 cursor-pointer">
           <input
             type="checkbox"
@@ -138,6 +138,16 @@ export function ExportControls({
             className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
           />
           <span className="text-slate-300">Header</span>
+        </label>
+
+        <label className="flex items-center gap-2 bg-slate-800/60 p-2 rounded border border-slate-800 hover:border-slate-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={exportSettings.includeSenderNames}
+            onChange={(e) => onUpdateExportSettings({ includeSenderNames: e.target.checked })}
+            className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
+          />
+          <span className="text-slate-300">Sender Names</span>
         </label>
 
         <label className="flex items-center gap-2 bg-slate-800/60 p-2 rounded border border-slate-800 hover:border-slate-700 cursor-pointer">

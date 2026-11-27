@@ -15,6 +15,7 @@ interface MessageBubbleProps {
   showReactionRow?: boolean;
   showTimestamps?: boolean;
   showPovAvatar?: boolean;
+  showSenderNames?: boolean;
 }
 
 export function MessageBubble({
@@ -27,6 +28,7 @@ export function MessageBubble({
   showReactionRow = true,
   showTimestamps = true,
   showPovAvatar = false,
+  showSenderNames = true,
 }: MessageBubbleProps) {
   const [imageError, setImageError] = useState(false);
 
@@ -95,9 +97,9 @@ export function MessageBubble({
 
         {/* Message Content Container */}
         <div className={`flex flex-col ${isPov ? 'items-end' : 'items-start'} min-w-0`}>
-          {/* Sender Name (Non-POV, first message in group only) */}
-          {!isPov && isFirstInGroup && (
-            <div className="flex items-center gap-1.5 mb-1 pl-1">
+          {/* Sender name appears on the first message in a run. */}
+          {showSenderNames && isFirstInGroup && (
+            <div className={`flex items-center gap-1.5 mb-1 ${isPov ? 'justify-end pr-1' : 'pl-1'}`}>
               <span
                 className="text-[12px] font-semibold tracking-wide drop-shadow-xs"
                 style={{ color: senderColor }}

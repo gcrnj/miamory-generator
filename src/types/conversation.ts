@@ -65,6 +65,7 @@ export interface ConversationSettings {
 export interface ExportSettings {
   pixelRatio: 2 | 3;
   includeHeader: boolean;
+  includeSenderNames: boolean;
   includeReactions: boolean;
   includeSystemEvents: boolean;
   includeTimestamps: boolean;
