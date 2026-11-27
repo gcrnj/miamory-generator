@@ -91,6 +91,17 @@ export function ConversationSettingsPanel({
               ))}
             </select>
           </div>
+          <label className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-[10px] text-slate-400 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.includePovAvatar ?? false}
+              onChange={(e) =>
+                onUpdateSettings({ includePovAvatar: e.target.checked })
+              }
+              className="w-3 h-3 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
+            />
+            Show avatar on sent messages
+          </label>
         </div>
 
         {/* Width + More toggle */}
@@ -215,24 +226,6 @@ export function ConversationSettingsPanel({
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Viewing As Avatar */}
-          <div>
-            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5 block">
-              Viewing As Avatar
-            </label>
-            <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.includePovAvatar ?? false}
-                onChange={(e) =>
-                  onUpdateSettings({ includePovAvatar: e.target.checked })
-                }
-                className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
-              />
-              Show avatar on sent messages
-            </label>
           </div>
 
           {/* Group Subtitle */}

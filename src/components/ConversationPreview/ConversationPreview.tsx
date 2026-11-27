@@ -103,19 +103,28 @@ export function ConversationPreview({
                 const isPov = msg.senderId === settings.povParticipantId;
                 const sender = participantsMap.get(msg.senderId);
 
-                // Check consecutive sender grouping
+                // Group only adjacent messages in the original timeline. System events,
+                // other senders, and unselected items all break a continuous run.
+                const sourceIndex = timeline.findIndex((entry) => entry.id === msg.id);
+                const sourcePrevItem = sourceIndex > 0 ? timeline[sourceIndex - 1] : null;
+                const sourceNextItem =
+                  sourceIndex >= 0 && sourceIndex < timeline.length - 1
+                    ? timeline[sourceIndex + 1]
+                    : null;
                 const prevItem = index > 0 ? filteredTimeline[index - 1] : null;
                 const nextItem =
                   index < filteredTimeline.length - 1 ? filteredTimeline[index + 1] : null;
 
                 const isPrevSameSender =
                   prevItem &&
+                  sourcePrevItem?.id === prevItem.id &&
                   prevItem.type === 'message' &&
                   (prevItem as MessageItem).senderId === msg.senderId &&
                   !msg.dateDivider;
 
                 const isNextSameSender =
                   nextItem &&
+                  sourceNextItem?.id === nextItem.id &&
                   nextItem.type === 'message' &&
                   (nextItem as MessageItem).senderId === msg.senderId &&
                   !(nextItem as MessageItem).dateDivider;

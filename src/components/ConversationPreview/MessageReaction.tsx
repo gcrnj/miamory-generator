@@ -6,15 +6,22 @@ import { ReactionItem } from '@/types/conversation';
 interface MessageReactionProps {
   reactions: ReactionItem[];
   isPov: boolean;
+  showAvatar?: boolean;
 }
 
-export function MessageReaction({ reactions, isPov }: MessageReactionProps) {
+export function MessageReaction({
+  reactions,
+  isPov,
+  showAvatar = !isPov,
+}: MessageReactionProps) {
   if (!reactions || reactions.length === 0) return null;
 
   return (
     <div
       className={`flex items-center gap-1.5 mt-1 select-none flex-wrap ${
-        isPov ? 'justify-end pr-1' : 'justify-start pl-11'
+        isPov
+          ? `justify-end ${showAvatar ? 'pr-11' : 'pr-1'}`
+          : 'justify-start pl-11'
       }`}
       data-testid="message-reactions-row"
     >

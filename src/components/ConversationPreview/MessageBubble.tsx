@@ -62,25 +62,33 @@ export function MessageBubble({
   return (
     <div className={`flex flex-col my-1 w-full ${isPov ? 'items-end' : 'items-start'}`}>
       <div className={`flex items-start gap-2 max-w-[85%] ${isPov ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Incoming messages always show their sender avatar; the POV avatar is optional. */}
+        {/* Incoming avatars are always shown; the POV avatar is optional. */}
         {(!isPov || showPovAvatar) && (
           <div className="w-8 h-8 shrink-0 select-none">
-            {sender?.avatarUrl && !imageError ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={sender.avatarUrl}
-                alt={senderName}
-                onError={() => setImageError(true)}
-                className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shadow-sm"
-              />
+            {isFirstInGroup ? (
+              sender?.avatarUrl && !imageError ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={sender.avatarUrl}
+                  alt={senderName}
+                  onError={() => setImageError(true)}
+                  className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shadow-sm"
+                />
+              ) : (
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm ring-1 ring-white/10"
+                  style={{ backgroundColor: avatarColor }}
+                  title={`${senderName} (${sender?.role || 'Member'})`}
+                >
+                  {initials}
+                </div>
+              )
             ) : (
+              /* Reserve the avatar column for the remaining messages in a run. */
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm ring-1 ring-white/10"
-                style={{ backgroundColor: avatarColor }}
-                title={`${senderName} (${sender?.role || 'Member'})`}
-              >
-                {initials}
-              </div>
+                className="w-8 h-8"
+                aria-hidden="true"
+              />
             )}
           </div>
         )}
@@ -133,7 +141,11 @@ export function MessageBubble({
 
       {/* REACTIONS: STRICTLY BELOW the message bubble, visually separated! */}
       {showReactionRow && message.reactions && message.reactions.length > 0 && (
-        <MessageReaction reactions={message.reactions} isPov={isPov} />
+        <MessageReaction
+          reactions={message.reactions}
+          isPov={isPov}
+          showAvatar={!isPov || showPovAvatar}
+        />
       )}
     </div>
   );
