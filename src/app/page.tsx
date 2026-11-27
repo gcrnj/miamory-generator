@@ -5,6 +5,7 @@ import { useConversationState } from '@/hooks/useConversationState';
 import { Navbar } from '@/components/Navbar';
 import { ConversationEditor } from '@/components/ConversationEditor/ConversationEditor';
 import { ConversationPreview } from '@/components/ConversationPreview/ConversationPreview';
+import { CsvModal } from '@/components/CsvManager/CsvModal';
 
 export default function Home() {
   const {
@@ -34,10 +35,12 @@ export default function Home() {
     deleteParticipant,
     resetToSample,
     clearConversation,
+    importCsvTimeline,
   } = useConversationState();
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'preview'>('editor');
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -50,6 +53,7 @@ export default function Home() {
         onRedo={redo}
         onResetToSample={resetToSample}
         onClearConversation={clearConversation}
+        onOpenCsvModal={() => setIsCsvModalOpen(true)}
         setActiveMobileTab={setActiveMobileTab}
       />
 
@@ -67,6 +71,7 @@ export default function Home() {
             timeline={timeline}
             exportSettings={exportSettings}
             previewRef={previewRef}
+            onOpenCsvModal={() => setIsCsvModalOpen(true)}
             onUpdateSettings={(updates) => setSettings((prev) => ({ ...prev, ...updates }))}
             onUpdateExportSettings={(updates) =>
               setExportSettings((prev) => ({ ...prev, ...updates }))
@@ -101,12 +106,12 @@ export default function Home() {
               Live Conversation Preview
             </span>
             <span className="text-[11px] text-slate-500">
-              Target canvas: #{settings.previewWidth}px • Background: #242832
+              {settings.previewWidth}px • #242832
             </span>
           </div>
 
-          {/* Interactive preview area */}
-          <div className="flex-1 overflow-y-auto">
+          {/* Scrollable preview area — canvas grows to full height so export captures everything */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <ConversationPreview
               timeline={timeline}
               settings={settings}
@@ -115,8 +120,29 @@ export default function Home() {
               previewRef={previewRef}
             />
           </div>
+
+          {/* Sticky Export Bar */}
+          <ExportBar
+            exportSettings={exportSettings}
+            onUpdateExportSettings={(updates) =>
+              setExportSettings((prev) => ({ ...prev, ...updates }))
+            }
+            previewRef={previewRef}
+            groupName={settings.groupName}
+            totalItems={timeline.length}
+          />
         </section>
       </main>
+
+      {/* CSV Manager Modal */}
+      <CsvModal
+        isOpen={isCsvModalOpen}
+        onClose={() => setIsCsvModalOpen(false)}
+        timeline={timeline}
+        participants={participants}
+        groupName={settings.groupName}
+        onImportTimeline={importCsvTimeline}
+      />
     </div>
   );
 }

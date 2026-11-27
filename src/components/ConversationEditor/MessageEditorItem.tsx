@@ -14,7 +14,6 @@ import {
   EyeOff,
   GripVertical,
   Calendar,
-  Sparkles,
 } from 'lucide-react';
 import { getInitials } from '@/utils/timeUtils';
 
@@ -37,13 +36,12 @@ interface MessageEditorItemProps {
   onToggleReaction: (messageId: string, emoji: string) => void;
   onRemoveReaction: (messageId: string, reactionId: string) => void;
   onUpdateReactionCount: (messageId: string, reactionId: string, count: number) => void;
-  // Drag and drop props
   onDragStart: (e: React.DragEvent, index: number) => void;
   onDragOver: (e: React.DragEvent, index: number) => void;
   onDrop: (e: React.DragEvent, index: number) => void;
 }
 
-const COMMON_EMOJIS = ['😂', '❤️', '👍', '😭', '😡', '😮', '🙏', '🥂', '🎉', '💍', '🤦‍♂️', '🥰'];
+const QUICK_EMOJIS = ['😂', '❤️', '👍', '😭', '😡', '😮', '🙏', '🎉', '🥰', '💍', '🤦‍♂️', '🥂'];
 
 export function MessageEditorItem({
   message,
@@ -69,17 +67,18 @@ export function MessageEditorItem({
   onDrop,
 }: MessageEditorItemProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showDateField, setShowDateField] = useState(Boolean(message.dateDivider));
   const [customEmoji, setCustomEmoji] = useState('');
-  const [showDateDividerInput, setShowDateDividerInput] = useState(Boolean(message.dateDivider));
 
   const isPov = message.senderId === povParticipantId;
-  const currentSender = participants.find((p) => p.id === message.senderId);
+  const sender = participants.find((p) => p.id === message.senderId);
 
   const handleAddCustomEmoji = (e: React.FormEvent) => {
     e.preventDefault();
     if (customEmoji.trim()) {
       onToggleReaction(message.id, customEmoji.trim());
       setCustomEmoji('');
+      setShowEmojiPicker(false);
     }
   };
 
@@ -89,295 +88,245 @@ export function MessageEditorItem({
       onDragStart={(e) => onDragStart(e, index)}
       onDragOver={(e) => onDragOver(e, index)}
       onDrop={(e) => onDrop(e, index)}
-      className={`group relative bg-slate-900 border rounded-xl p-3 transition-all ${
+      className={`group relative rounded-xl border transition-all ${
         isSelectedForExport
-          ? 'border-blue-500/80 ring-1 ring-blue-500/40 bg-slate-900/90'
-          : 'border-slate-800 hover:border-slate-700/80'
+          ? 'border-blue-500/60 bg-blue-950/10'
+          : 'border-slate-800/80 bg-slate-900/50 hover:border-slate-700'
       }`}
     >
-      {/* Top Bar of the Message Row */}
-      <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800/80">
-        <div className="flex items-center gap-2 min-w-0">
-          {/* Drag Handle */}
+      {/* Optional Date Divider pill above card */}
+      {message.dateDivider && (
+        <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+          <Calendar className="w-3 h-3 text-amber-400 shrink-0" />
+          <input
+            type="text"
+            value={message.dateDivider}
+            onChange={(e) => onUpdate(message.id, { dateDivider: e.target.value || undefined })}
+            placeholder="Date separator (e.g. Today, Nov 28)"
+            className="flex-1 bg-transparent text-amber-300 text-[11px] font-semibold focus:outline-none placeholder:text-slate-500 border-b border-amber-800/40 pb-0.5"
+          />
+          <button
+            type="button"
+            onClick={() => { onUpdate(message.id, { dateDivider: undefined }); setShowDateField(false); }}
+            className="text-slate-600 hover:text-rose-400 text-[11px]"
+          >✕</button>
+        </div>
+      )}
+
+      {/* ── Main Card Layout ── */}
+      <div className="p-2.5">
+        {/* Row 1: Drag + Checkbox + Sender + Actions */}
+        <div className="flex items-center gap-2 mb-2">
+          {/* Drag handle */}
           <div
-            className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300 p-0.5"
+            className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 transition-colors shrink-0"
             title="Drag to reorder"
           >
-            <GripVertical className="w-4 h-4" />
+            <GripVertical className="w-3.5 h-3.5" />
           </div>
 
-          {/* Selection Checkbox (for selective export / crop) */}
+          {/* Export checkbox */}
           <input
             type="checkbox"
             checked={isSelectedForExport}
             onChange={() => onToggleSelect(message.id)}
-            title="Select for range / partial export"
-            className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-0 cursor-pointer"
+            className="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-0 cursor-pointer shrink-0"
+            title="Select for partial export"
           />
 
-          <span className="text-[11px] font-mono text-slate-500 font-semibold w-5">
-            #{index + 1}
+          {/* Number label */}
+          <span className="text-[10px] font-mono text-slate-600 w-4 shrink-0 select-none">
+            {index + 1}
           </span>
 
-          {/* Sender Dropdown */}
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span
-              className="w-3.5 h-3.5 rounded-full shrink-0"
-              style={{ backgroundColor: currentSender?.avatarColor || '#64748B' }}
-            />
+          {/* Sender mini-avatar + dropdown */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {sender?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={sender.avatarUrl}
+                alt={sender.name}
+                className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10 shrink-0"
+              />
+            ) : (
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shrink-0"
+                style={{ backgroundColor: sender?.avatarColor || '#64748B' }}
+              >
+                {sender ? getInitials(sender.name) : '?'}
+              </div>
+            )}
+
             <select
               value={message.senderId}
               onChange={(e) => onUpdate(message.id, { senderId: e.target.value })}
-              className={`text-xs font-semibold rounded px-2 py-1 border bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[170px] truncate ${
-                isPov
-                  ? 'text-blue-400 border-blue-500/40'
-                  : 'text-slate-200 border-slate-700'
+              className={`flex-1 min-w-0 bg-transparent text-[13px] font-semibold focus:outline-none cursor-pointer truncate appearance-none ${
+                isPov ? 'text-blue-400' : 'text-slate-200'
               }`}
             >
               {participants.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.role}) {p.id === povParticipantId ? '★ POV' : ''}
+                <option key={p.id} value={p.id} className="bg-slate-800 text-white text-sm font-normal">
+                  {p.name}{p.id === povParticipantId ? ' ★' : ''}
                 </option>
               ))}
             </select>
+
             {isPov && (
-              <span className="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.5 rounded font-medium">
-                Right Bubble
+              <span className="text-[10px] text-blue-400 bg-blue-950/60 border border-blue-800/60 px-1.5 py-0.5 rounded font-medium shrink-0">
+                Right
               </span>
             )}
           </div>
+
+          {/* Action buttons — always visible on hover */}
+          <div className="flex items-center gap-0.5 shrink-0 text-slate-600">
+            <button type="button" onClick={() => onMoveUp(message.id)} disabled={index === 0}
+              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors" title="Move Up">
+              <ArrowUp className="w-3 h-3" />
+            </button>
+            <button type="button" onClick={() => onMoveDown(message.id)} disabled={index === totalItems - 1}
+              className="p-1 hover:text-slate-200 disabled:opacity-20 transition-colors" title="Move Down">
+              <ArrowDown className="w-3 h-3" />
+            </button>
+            <button type="button" onClick={() => onDuplicate(message.id)}
+              className="p-1 hover:text-amber-400 transition-colors" title="Duplicate">
+              <Copy className="w-3 h-3" />
+            </button>
+            <button type="button" onClick={() => onDelete(message.id)}
+              className="p-1 hover:text-rose-400 transition-colors" title="Delete">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
         </div>
 
-        {/* Row Quick Action Buttons */}
-        <div className="flex items-center gap-1 text-slate-400">
-          <button
-            type="button"
-            onClick={() => onMoveUp(message.id)}
-            disabled={index === 0}
-            className="p-1 hover:text-white disabled:opacity-30 transition-colors"
-            title="Move Up"
-          >
-            <ArrowUp className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onMoveDown(message.id)}
-            disabled={index === totalItems - 1}
-            className="p-1 hover:text-white disabled:opacity-30 transition-colors"
-            title="Move Down"
-          >
-            <ArrowDown className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDuplicate(message.id)}
-            className="p-1 hover:text-amber-400 transition-colors"
-            title="Duplicate Message"
-          >
-            <Copy className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(message.id)}
-            className="p-1 hover:text-rose-400 transition-colors"
-            title="Delete Message"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Optional Date Divider Input */}
-      {showDateDividerInput && (
-        <div className="mb-2 flex items-center gap-2 bg-slate-800/40 px-2 py-1 rounded border border-slate-800">
-          <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="text-[11px] text-slate-400 shrink-0">Date Divider:</span>
-          <input
-            type="text"
-            value={message.dateDivider || ''}
-            onChange={(e) => onUpdate(message.id, { dateDivider: e.target.value })}
-            placeholder="e.g. Today, Yesterday, Saturday, Nov 28"
-            className="flex-1 bg-slate-900 text-white text-xs px-2 py-0.5 rounded border border-slate-700"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              onUpdate(message.id, { dateDivider: undefined });
-              setShowDateDividerInput(false);
-            }}
-            className="text-[11px] text-slate-500 hover:text-rose-400"
-          >
-            Remove
-          </button>
-        </div>
-      )}
-
-      {/* Main Message Text Input */}
-      <div className="mb-2.5">
+        {/* Row 2: Message textarea */}
         <textarea
           rows={2}
           value={message.text}
           onChange={(e) => onUpdate(message.id, { text: e.target.value })}
-          placeholder="Type message text... (supports Filipino, English, Taglish, line breaks, emojis)"
-          className="w-full bg-slate-950/70 text-slate-100 text-sm rounded-lg p-2.5 border border-slate-700/80 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y placeholder:text-slate-500 font-normal leading-relaxed"
+          placeholder="Type message text…"
+          className="w-full bg-slate-950/80 text-slate-100 text-[13px] rounded-lg px-3 py-2 border border-slate-700/60 focus:outline-none focus:ring-1 focus:ring-blue-500/70 resize-y placeholder:text-slate-600 leading-relaxed"
         />
-      </div>
 
-      {/* Reactions Row (VISUALLY SEPARATE, strictly below message) */}
-      <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs">
-        <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 mr-1">
-          <Smile className="w-3 h-3 text-amber-400" />
-          Reactions:
-        </span>
-
-        {message.reactions &&
-          message.reactions.map((rx) => (
-            <div
-              key={rx.id}
-              className="inline-flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-200"
-            >
-              <span>{rx.emoji}</span>
-              <input
-                type="number"
-                min={1}
-                max={99}
-                value={rx.count}
-                onChange={(e) =>
-                  onUpdateReactionCount(message.id, rx.id, parseInt(e.target.value, 10) || 1)
-                }
-                className="w-8 bg-slate-900 text-white text-[11px] text-center rounded border border-slate-700 p-0.5"
-              />
-              <button
-                type="button"
-                onClick={() => onRemoveReaction(message.id, rx.id)}
-                className="text-slate-500 hover:text-rose-400 ml-0.5"
-                title="Remove reaction"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-
-        {/* Quick Emoji Toggles */}
-        <div className="relative inline-flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 flex items-center gap-1 transition-colors"
-          >
-            <Plus className="w-3 h-3" /> Reaction
-          </button>
-
-          {showEmojiPicker && (
-            <div className="absolute top-7 left-0 z-30 bg-slate-800 border border-slate-700 rounded-lg p-2 shadow-xl flex flex-col gap-2 min-w-[220px]">
-              <div className="flex flex-wrap gap-1.5">
-                {COMMON_EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => {
-                      onToggleReaction(message.id, emoji);
-                      setShowEmojiPicker(false);
-                    }}
-                    className="text-base p-1 hover:bg-slate-700 rounded transition-transform hover:scale-125"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleAddCustomEmoji} className="flex gap-1 pt-1 border-t border-slate-700">
+        {/* Row 3: Reactions */}
+        {message.reactions && message.reactions.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1">
+            {message.reactions.map((rx) => (
+              <div key={rx.id} className="inline-flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/80 text-slate-200 text-[12px]">
+                <span>{rx.emoji}</span>
                 <input
-                  type="text"
-                  maxLength={4}
-                  placeholder="Custom emoji"
-                  value={customEmoji}
-                  onChange={(e) => setCustomEmoji(e.target.value)}
-                  className="flex-1 bg-slate-900 text-white text-xs px-2 py-1 rounded border border-slate-700"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={rx.count}
+                  onChange={(e) => onUpdateReactionCount(message.id, rx.id, parseInt(e.target.value, 10) || 1)}
+                  className="w-7 bg-transparent text-[11px] text-center text-slate-300 focus:outline-none"
                 />
-                <button
-                  type="submit"
-                  disabled={!customEmoji.trim()}
-                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2 py-1 rounded"
-                >
-                  Add
-                </button>
-              </form>
+                <button type="button" onClick={() => onRemoveReaction(message.id, rx.id)}
+                  className="text-slate-600 hover:text-rose-400 leading-none">×</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Row 4: Footer — Timestamp + controls */}
+        <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-slate-500">
+          <div className="flex items-center gap-2">
+            {/* Timestamp input */}
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <input
+                type="text"
+                value={message.timestamp}
+                onChange={(e) => onUpdate(message.id, { timestamp: e.target.value })}
+                placeholder="9:41 AM"
+                className="w-16 bg-transparent text-slate-300 text-[12px] focus:outline-none border-b border-slate-700 text-center"
+              />
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Bottom Bar: Timestamp, Toggle Visibility, Add Row Buttons */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs text-slate-400">
-        <div className="flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-slate-500" />
-          <input
-            type="text"
-            value={message.timestamp}
-            onChange={(e) => onUpdate(message.id, { timestamp: e.target.value })}
-            placeholder="9:41 AM"
-            className="w-20 bg-slate-950 text-slate-200 text-xs px-2 py-0.5 rounded border border-slate-700 text-center"
-          />
-
-          <button
-            type="button"
-            onClick={() => onUpdate(message.id, { showTimestamp: message.showTimestamp === false })}
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] ${
-              message.showTimestamp !== false
-                ? 'text-emerald-400 bg-emerald-950/40'
-                : 'text-slate-500 bg-slate-800'
-            }`}
-            title="Toggle timestamp visibility"
-          >
-            {message.showTimestamp !== false ? (
-              <>
-                <Eye className="w-3 h-3" /> Time On
-              </>
-            ) : (
-              <>
-                <EyeOff className="w-3 h-3" /> Time Off
-              </>
-            )}
-          </button>
-
-          {!showDateDividerInput && (
+            {/* Show/hide timestamp */}
             <button
               type="button"
-              onClick={() => setShowDateDividerInput(true)}
-              className="text-[11px] text-slate-400 hover:text-amber-400 flex items-center gap-1"
+              onClick={() => onUpdate(message.id, { showTimestamp: message.showTimestamp === false })}
+              className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] transition-colors ${
+                message.showTimestamp !== false ? 'text-emerald-500' : 'text-slate-600'
+              }`}
+              title="Toggle timestamp visibility"
             >
-              <Calendar className="w-3 h-3" /> + Date Divider
+              {message.showTimestamp !== false ? <Eye className="w-2.5 h-2.5" /> : <EyeOff className="w-2.5 h-2.5" />}
+              <span>{message.showTimestamp !== false ? 'Time' : 'Hidden'}</span>
             </button>
-          )}
-        </div>
 
-        {/* Add Above / Below Shortcuts */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => onAddMessageAbove(index)}
-            className="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60"
-            title="Add message directly above this one"
-          >
-            + Above
-          </button>
-          <button
-            type="button"
-            onClick={() => onAddMessageBelow(index)}
-            className="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700/60"
-            title="Add message directly below this one"
-          >
-            + Below
-          </button>
-          <button
-            type="button"
-            onClick={() => onAddSystemEventBelow(index)}
-            className="text-[11px] bg-slate-800 hover:bg-slate-700 text-amber-300/80 px-2 py-0.5 rounded border border-slate-700/60"
-            title="Add system event below"
-          >
-            + Event
-          </button>
+            {/* Date divider toggle */}
+            {!message.dateDivider && (
+              <button
+                type="button"
+                onClick={() => { setShowDateField(true); onUpdate(message.id, { dateDivider: 'Today' }); }}
+                className="text-slate-600 hover:text-amber-400 transition-colors flex items-center gap-0.5"
+                title="Add date separator before this message"
+              >
+                <Calendar className="w-2.5 h-2.5" />
+                <span>Date</span>
+              </button>
+            )}
+
+            {/* Add reaction */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="text-slate-600 hover:text-amber-400 transition-colors flex items-center gap-0.5"
+                title="Add reaction"
+              >
+                <Smile className="w-2.5 h-2.5" />
+                <span>React</span>
+              </button>
+
+              {showEmojiPicker && (
+                <div className="absolute bottom-6 left-0 z-30 bg-slate-800 border border-slate-700 rounded-xl p-2.5 shadow-2xl min-w-[220px]">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {QUICK_EMOJIS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => { onToggleReaction(message.id, emoji); setShowEmojiPicker(false); }}
+                        className="text-base p-1 hover:bg-slate-700 rounded transition-transform hover:scale-125"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                  <form onSubmit={handleAddCustomEmoji} className="flex gap-1 pt-1.5 border-t border-slate-700">
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder="Custom emoji…"
+                      value={customEmoji}
+                      onChange={(e) => setCustomEmoji(e.target.value)}
+                      className="flex-1 bg-slate-900 text-white text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none"
+                    />
+                    <button type="submit" disabled={!customEmoji.trim()}
+                      className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs px-2 py-1 rounded transition-colors">
+                      Add
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick insert row buttons */}
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={() => onAddMessageAbove(index)}
+              className="text-slate-600 hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
+              title="Insert message above">↑ Msg</button>
+            <button type="button" onClick={() => onAddMessageBelow(index)}
+              className="text-slate-600 hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
+              title="Insert message below">↓ Msg</button>
+            <button type="button" onClick={() => onAddSystemEventBelow(index)}
+              className="text-slate-600 hover:text-amber-400 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors"
+              title="Insert system event below">↓ Evt</button>
+          </div>
         </div>
       </div>
     </div>

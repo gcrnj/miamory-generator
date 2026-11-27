@@ -53,12 +53,13 @@ export function ConversationPreview({
   }, [timeline, exportSettings]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full h-full overflow-y-auto p-4 md:p-6">
+    <div className="flex flex-col items-center justify-start w-full p-4 md:p-6">
       {/* Container with exact background color #242832 */}
+      {/* NOTE: No overflow-hidden here — let the canvas grow to full height so export captures everything */}
       <div
         ref={previewRef}
         id="miamory-preview-canvas"
-        className="w-full relative shadow-2xl rounded-2xl overflow-hidden border border-white/10 transition-all duration-200"
+        className="w-full relative shadow-2xl rounded-2xl border border-white/10 transition-all duration-200"
         style={{
           maxWidth: `${settings.previewWidth || 420}px`,
           backgroundColor: '#242832', // EXACT REQUIRED BACKGROUND COLOR

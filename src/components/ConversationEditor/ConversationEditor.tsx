@@ -20,6 +20,7 @@ interface ConversationEditorProps {
   timeline: TimelineItem[];
   exportSettings: ExportSettings;
   previewRef: React.RefObject<HTMLDivElement | null>;
+  onOpenCsvModal?: () => void;
   onUpdateSettings: (updates: Partial<ConversationSettings>) => void;
   onUpdateExportSettings: (updates: Partial<ExportSettings>) => void;
   onAutoGenerateTimestamps: () => void;
@@ -44,6 +45,7 @@ export function ConversationEditor({
   timeline,
   exportSettings,
   previewRef,
+  onOpenCsvModal,
   onUpdateSettings,
   onUpdateExportSettings,
   onAutoGenerateTimestamps,
@@ -130,6 +132,7 @@ export function ConversationEditor({
         participants={participants}
         povParticipantId={settings.povParticipantId}
         selectedItemIds={exportSettings.selectedItemIds}
+        onOpenCsvModal={onOpenCsvModal}
         onToggleSelect={handleToggleSelect}
         onSelectAll={handleSelectAll}
         onDeselectAll={handleDeselectAll}

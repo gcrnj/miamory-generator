@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { ConversationSettings, Participant } from '@/types/conversation';
-import { Settings, Users, Sparkles, Clock, Palette, ChevronDown, ChevronUp } from 'lucide-react';
+import { getInitials } from '@/utils/timeUtils';
+import { ChevronDown, ChevronUp, Clock, Palette, Upload } from 'lucide-react';
 
-interface ConversationSettingsProps {
+interface ConversationSettingsPanelProps {
   settings: ConversationSettings;
   participants: Participant[];
   onUpdateSettings: (updates: Partial<ConversationSettings>) => void;
@@ -16,180 +17,203 @@ export function ConversationSettingsPanel({
   participants,
   onUpdateSettings,
   onAutoGenerateTimestamps,
-}: ConversationSettingsProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+}: ConversationSettingsPanelProps) {
+  const [showMore, setShowMore] = useState(false);
+
+  const povParticipant = participants.find((p) => p.id === settings.povParticipantId);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm mb-4">
-      {/* Top Main Controls: POV Owner & Group Name */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        {/* POV Owner */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-blue-400" />
-            Conversation POV (Viewer)
-          </label>
-          <div className="relative">
-            <select
-              value={settings.povParticipantId}
-              onChange={(e) => onUpdateSettings({ povParticipantId: e.target.value })}
-              className="w-full bg-slate-800 text-white text-sm rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-            >
-              {participants.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.role}) {p.id === settings.povParticipantId ? '★ (Right Bubble)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            Messages from this person appear on the <strong>right</strong> in blue. Others appear on the left.
-          </p>
-        </div>
-
+    <div className="border-b border-slate-800/80 bg-slate-950">
+      {/* ─── Main Row: Group name + POV ─── */}
+      <div className="flex items-stretch gap-0 divide-x divide-slate-800/80">
         {/* Group Name */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Group Chat Name
+        <div className="flex-1 px-3 py-2.5 flex flex-col justify-center min-w-0">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1 block">
+            Group Name
           </label>
           <input
             type="text"
             value={settings.groupName}
             onChange={(e) => onUpdateSettings({ groupName: e.target.value })}
-            placeholder="e.g. Santos-Bautista Wedding Entourage 💍"
-            className="w-full bg-slate-800 text-white text-sm rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Santos-Bautista Wedding Entourage 💍"
+            className="w-full bg-transparent text-slate-100 text-[13px] font-medium placeholder:text-slate-600 focus:outline-none focus:text-white transition-colors truncate"
           />
-          <p className="text-[11px] text-slate-400 mt-1">
-            Displayed at the top of the conversation header.
-          </p>
+        </div>
+
+        {/* POV Selector */}
+        <div className="shrink-0 px-3 py-2.5 flex flex-col justify-center min-w-0 max-w-[200px]">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1 block">
+            Viewing As
+          </label>
+          <div className="flex items-center gap-1.5">
+            {/* Mini avatar of POV */}
+            <div className="relative shrink-0">
+              {povParticipant?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={povParticipant.avatarUrl}
+                  alt={povParticipant.name}
+                  className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10"
+                />
+              ) : (
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
+                  style={{ backgroundColor: povParticipant?.avatarColor || '#64748B' }}
+                >
+                  {povParticipant ? getInitials(povParticipant.name) : '?'}
+                </div>
+              )}
+              {/* Blue dot = POV indicator */}
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border border-slate-950" />
+            </div>
+            <select
+              value={settings.povParticipantId}
+              onChange={(e) => onUpdateSettings({ povParticipantId: e.target.value })}
+              className="bg-transparent text-slate-200 text-[13px] font-medium focus:outline-none cursor-pointer truncate max-w-[140px] appearance-none"
+            >
+              {participants.map((p) => (
+                <option key={p.id} value={p.id} className="bg-slate-800 text-white">
+                  {p.name.split(' ')[0]} {p.name.includes('"') ? p.name.match(/"([^"]+)"/)?.[0] || '' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Width + More toggle */}
+        <div className="shrink-0 px-3 py-2.5 flex flex-col justify-center gap-1.5">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 block">
+            Width
+          </label>
+          <div className="flex items-center gap-1.5">
+            <select
+              value={settings.previewWidth}
+              onChange={(e) => onUpdateSettings({ previewWidth: Number(e.target.value) })}
+              className="bg-slate-800 text-slate-200 text-[12px] border border-slate-700 rounded px-2 py-1 focus:outline-none appearance-none"
+            >
+              <option value={375}>375 — Compact</option>
+              <option value={420}>420 — Standard</option>
+              <option value={480}>480 — Medium</option>
+              <option value={540}>540 — FB Feed</option>
+              <option value={600}>600 — Wide</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setShowMore(!showMore)}
+              className="p-1 rounded text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              title="More settings"
+            >
+              {showMore ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Toggle More Header & Timestamp Settings */}
-      <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 focus:outline-none"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="w-3.5 h-3.5" /> Hide advanced settings (Avatar, width, auto-time)
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-3.5 h-3.5" /> Show advanced settings (Avatar, width, auto-time)
-            </>
-          )}
-        </button>
-
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-slate-400">Width:</span>
-          <select
-            value={settings.previewWidth}
-            onChange={(e) => onUpdateSettings({ previewWidth: Number(e.target.value) })}
-            className="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded px-2 py-1 focus:outline-none"
-          >
-            <option value={375}>375px (Compact)</option>
-            <option value={420}>420px (Phone Standard)</option>
-            <option value={480}>480px (Medium)</option>
-            <option value={540}>540px (FB Feed)</option>
-            <option value={600}>600px (Wide)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Advanced Settings Drawer */}
-      {isExpanded && (
-        <div className="mt-3.5 pt-3.5 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {/* Group Avatar Initials, Color & Upload */}
+      {/* ─── Expanded settings ─── */}
+      {showMore && (
+        <div className="px-3 pb-3 pt-2 border-t border-slate-800/60 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Group Avatar */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Group Avatar (Initials or Photo)
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5 block">
+              Group Avatar
             </label>
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                maxLength={3}
-                value={settings.groupAvatarInitials || ''}
-                onChange={(e) => onUpdateSettings({ groupAvatarInitials: e.target.value })}
-                className="w-14 bg-slate-800 text-white text-xs rounded px-2 py-1.5 border border-slate-700 uppercase font-bold text-center"
-                title="Initials"
-              />
-              <input
-                type="color"
-                value={settings.groupAvatarColor || '#E11D48'}
-                onChange={(e) => onUpdateSettings({ groupAvatarColor: e.target.value })}
-                className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer"
-                title="Avatar Background Color"
-              />
-              <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded border border-slate-700 transition-colors">
-                Photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        if (typeof reader.result === 'string') {
-                          onUpdateSettings({ groupAvatarUrl: reader.result });
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs ring-1 ring-white/10 shrink-0"
+                style={{ backgroundColor: settings.groupAvatarColor || '#E11D48' }}
+              >
+                {settings.groupAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={settings.groupAvatarUrl} alt="group" className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  settings.groupAvatarInitials || 'GC'
+                )}
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex gap-1">
+                  <input
+                    type="text"
+                    maxLength={3}
+                    value={settings.groupAvatarInitials || ''}
+                    onChange={(e) => onUpdateSettings({ groupAvatarInitials: e.target.value.toUpperCase() })}
+                    className="w-10 bg-slate-800 text-white text-xs rounded px-1.5 py-1 border border-slate-700 uppercase font-bold text-center"
+                    placeholder="SB"
+                  />
+                  <input
+                    type="color"
+                    value={settings.groupAvatarColor || '#E11D48'}
+                    onChange={(e) => onUpdateSettings({ groupAvatarColor: e.target.value })}
+                    className="w-7 h-7 rounded border-0 bg-transparent cursor-pointer"
+                  />
+                  <label className="cursor-pointer text-slate-400 hover:text-white p-1" title="Upload group photo">
+                    <Upload className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            if (typeof reader.result === 'string') {
+                              onUpdateSettings({ groupAvatarUrl: reader.result });
+                            }
+                          };
+                          reader.readAsDataURL(file);
                         }
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-              </label>
-              {settings.groupAvatarUrl && (
-                <button
-                  type="button"
-                  onClick={() => onUpdateSettings({ groupAvatarUrl: undefined })}
-                  className="text-slate-500 hover:text-rose-400 text-xs"
-                  title="Remove group photo"
-                >
-                  Clear
-                </button>
-              )}
+                      }}
+                    />
+                  </label>
+                  {settings.groupAvatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => onUpdateSettings({ groupAvatarUrl: undefined })}
+                      className="text-[10px] text-slate-500 hover:text-rose-400 self-center"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Group Description / Subtitle */}
+          {/* Group Subtitle */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Group Description / Subtitle
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5 block">
+              Subtitle
             </label>
             <input
               type="text"
               value={settings.groupDescription || ''}
               onChange={(e) => onUpdateSettings({ groupDescription: e.target.value })}
-              placeholder="e.g. 8 participants or custom subtitle"
-              className="w-full bg-slate-800 text-white text-xs rounded px-2.5 py-1.5 border border-slate-700"
+              placeholder="e.g. 8 participants"
+              className="w-full bg-slate-800 text-white text-[12px] rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          {/* POV Theme Color */}
+          {/* Bubble Color */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
-              <Palette className="w-3 h-3 text-pink-400" /> POV Bubble Color
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5 block flex items-center gap-1">
+              <Palette className="w-3 h-3 text-pink-400" /> Bubble Color
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <input
                 type="color"
                 value={settings.chatThemeColor || '#0A7CFF'}
                 onChange={(e) => onUpdateSettings({ chatThemeColor: e.target.value })}
-                className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer"
+                className="w-7 h-7 rounded border-0 bg-transparent cursor-pointer"
               />
-              <div className="flex gap-1.5">
-                {['#0A7CFF', '#0084FF', '#25D366', '#8B5CF6', '#EC4899'].map((c) => (
+              <div className="flex gap-1">
+                {['#0A7CFF', '#25D366', '#8B5CF6', '#EC4899', '#F97316'].map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => onUpdateSettings({ chatThemeColor: c })}
-                    className="w-5 h-5 rounded-full ring-1 ring-white/20 transition-transform hover:scale-110"
+                    className={`w-4 h-4 rounded-full ring-1 transition-transform hover:scale-125 ${
+                      settings.chatThemeColor === c ? 'ring-white scale-110' : 'ring-white/20'
+                    }`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
@@ -197,48 +221,37 @@ export function ConversationSettingsPanel({
             </div>
           </div>
 
-          {/* Auto Timestamp Interval */}
-          <div className="sm:col-span-2 md:col-span-3 bg-slate-800/60 p-3 rounded-lg flex flex-wrap items-center justify-between gap-3 border border-slate-700/50">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
-              <div>
-                <span className="text-xs font-medium text-slate-200">
-                  Auto Timestamp Generator:
-                </span>
-                <span className="text-[11px] text-slate-400 block">
-                  Starts at {settings.startTimestamp}, increments by {settings.autoTimestampIntervalMinutes} mins
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
+          {/* Auto Timestamps */}
+          <div>
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5 block flex items-center gap-1">
+              <Clock className="w-3 h-3 text-emerald-400" /> Auto Timestamps
+            </label>
+            <div className="flex items-center gap-1.5">
               <input
                 type="text"
                 value={settings.startTimestamp}
                 onChange={(e) => onUpdateSettings({ startTimestamp: e.target.value })}
                 placeholder="9:41 AM"
-                className="w-20 bg-slate-900 text-white text-xs rounded px-2 py-1 border border-slate-700 text-center"
+                className="w-16 bg-slate-800 text-white text-[12px] rounded px-2 py-1.5 border border-slate-700 text-center"
               />
               <select
                 value={settings.autoTimestampIntervalMinutes}
-                onChange={(e) =>
-                  onUpdateSettings({ autoTimestampIntervalMinutes: Number(e.target.value) })
-                }
-                className="bg-slate-900 text-xs text-white rounded px-2 py-1 border border-slate-700"
+                onChange={(e) => onUpdateSettings({ autoTimestampIntervalMinutes: Number(e.target.value) })}
+                className="bg-slate-800 text-[12px] text-white rounded px-1.5 py-1.5 border border-slate-700"
               >
-                <option value={1}>+1 min</option>
-                <option value={2}>+2 mins</option>
-                <option value={3}>+3 mins</option>
-                <option value={5}>+5 mins</option>
-                <option value={10}>+10 mins</option>
+                <option value={1}>+1m</option>
+                <option value={2}>+2m</option>
+                <option value={3}>+3m</option>
+                <option value={5}>+5m</option>
+                <option value={10}>+10m</option>
               </select>
-
               <button
                 type="button"
                 onClick={onAutoGenerateTimestamps}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-2.5 py-1 rounded transition-colors"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-semibold px-2 py-1.5 rounded transition-colors whitespace-nowrap"
+                title="Apply auto timestamps to all messages"
               >
-                Sync All Timestamps
+                Sync All
               </button>
             </div>
           </div>

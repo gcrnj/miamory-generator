@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Undo2, Redo2, RefreshCw, FilePlus2, Eye, Edit3, Heart } from 'lucide-react';
+import { Undo2, Redo2, RefreshCw, FilePlus2, Eye, Edit3, Heart, FileSpreadsheet, ChevronDown } from 'lucide-react';
 
 interface NavbarProps {
   canUndo: boolean;
@@ -11,6 +11,7 @@ interface NavbarProps {
   onRedo: () => void;
   onResetToSample: () => void;
   onClearConversation: () => void;
+  onOpenCsvModal: () => void;
   setActiveMobileTab: (tab: 'editor' | 'preview') => void;
 }
 
@@ -22,103 +23,117 @@ export function Navbar({
   onRedo,
   onResetToSample,
   onClearConversation,
+  onOpenCsvModal,
   setActiveMobileTab,
 }: NavbarProps) {
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to start a new blank conversation?')) {
+    if (window.confirm('Start a new blank conversation? Your draft will be cleared.')) {
       onClearConversation();
     }
   };
 
   const handleResetSample = () => {
-    if (window.confirm('Reset conversation to the wedding sample?')) {
+    if (window.confirm('Reset to the wedding sample conversation?')) {
       onResetToSample();
     }
   };
 
   return (
-    <header className="h-14 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between shrink-0 select-none sticky top-0 z-40">
+    <header className="h-12 border-b border-slate-800/80 bg-[#0C0E14] px-3 md:px-4 flex items-center justify-between shrink-0 select-none z-40 relative">
       {/* Brand */}
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center text-white shadow-md shadow-pink-900/40">
-          <Heart className="w-4 h-4 fill-white" />
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-pink-500 via-rose-500 to-red-600 flex items-center justify-center text-white shadow-sm shadow-pink-900/50">
+          <Heart className="w-3.5 h-3.5 fill-white" />
         </div>
-        <div>
-          <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-            Miamory <span className="font-normal text-slate-400">Generator</span>
-          </h1>
-          <p className="text-[10px] text-slate-500 hidden sm:block">
-            Realistic Facebook Conversation Studio
-          </p>
+        <div className="leading-none">
+          <div className="text-[13px] font-bold tracking-tight text-white">
+            Miamory <span className="font-normal text-slate-400 text-[12px]">Conversation Generator</span>
+          </div>
         </div>
       </div>
 
-      {/* Undo / Redo & Presets */}
-      <div className="flex items-center gap-1 sm:gap-2">
+      {/* Center action strip */}
+      <div className="flex items-center gap-1">
+        {/* Undo / Redo */}
         <button
           type="button"
           onClick={onUndo}
           disabled={!canUndo}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-          title="Undo (Ctrl/Cmd+Z)"
+          className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-25 transition-colors"
+          title="Undo (Cmd/Ctrl+Z)"
         >
-          <Undo2 className="w-4 h-4" />
+          <Undo2 className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
           onClick={onRedo}
           disabled={!canRedo}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-          title="Redo (Ctrl/Cmd+Shift+Z)"
+          className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-25 transition-colors"
+          title="Redo (Cmd/Ctrl+Shift+Z)"
         >
-          <Redo2 className="w-4 h-4" />
+          <Redo2 className="w-3.5 h-3.5" />
         </button>
 
-        <div className="h-4 w-px bg-slate-800 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-slate-800 mx-1.5 hidden sm:block" />
 
+        {/* CSV Template Button */}
+        <button
+          type="button"
+          onClick={onOpenCsvModal}
+          className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition-all gap-1.5"
+          title="CSV Import / Export / Template"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span>CSV</span>
+        </button>
+
+        {/* Load Sample */}
         <button
           type="button"
           onClick={handleResetSample}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg transition-colors"
-          title="Reload funny wedding sample conversation"
+          className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition-all"
+          title="Load wedding sample conversation"
         >
-          <RefreshCw className="w-3.5 h-3.5 text-pink-400" />
-          Load Wedding Sample
+          <RefreshCw className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+          <span className="hidden md:inline">Sample</span>
         </button>
 
+        {/* New Conversation */}
         <button
           type="button"
           onClick={handleClear}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg transition-colors"
-          title="Clear all messages"
+          className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 text-[12px] font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition-all"
+          title="New blank conversation"
         >
-          <FilePlus2 className="w-3.5 h-3.5 text-blue-400" />
-          New Chat
+          <FilePlus2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          <span className="hidden md:inline">New</span>
         </button>
 
+        <div className="h-4 w-px bg-slate-800 mx-1.5 hidden sm:block" />
+
         {/* Mobile Tab Switcher */}
-        <div className="flex lg:hidden bg-slate-900 p-0.5 rounded-lg border border-slate-800 ml-1">
+        <div className="flex lg:hidden bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60">
           <button
             type="button"
             onClick={() => setActiveMobileTab('editor')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
               activeMobileTab === 'editor'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Edit3 className="w-3.5 h-3.5" /> Editor
+            <Edit3 className="w-3 h-3" /> Edit
           </button>
           <button
             type="button"
             onClick={() => setActiveMobileTab('preview')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
               activeMobileTab === 'preview'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Eye className="w-3.5 h-3.5" /> Preview
+            <Eye className="w-3 h-3" /> View
           </button>
         </div>
       </div>

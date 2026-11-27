@@ -483,6 +483,28 @@ export function useConversationState() {
     setTimeline([]);
   }, [recordHistory]);
 
+  // Import timeline from CSV (replace or append)
+  const importCsvTimeline = useCallback(
+    (newTimeline: TimelineItem[], newParticipants: Participant[], mode: 'replace' | 'append') => {
+      recordHistory();
+      if (newParticipants.length > 0) {
+        setParticipants((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const toAdd = newParticipants.filter((np) => !existingIds.has(np.id));
+          return [...prev, ...toAdd];
+        });
+      }
+
+      setTimeline((prev) => {
+        if (mode === 'replace') {
+          return newTimeline;
+        }
+        return [...prev, ...newTimeline];
+      });
+    },
+    [recordHistory]
+  );
+
   return {
     participants,
     settings,
@@ -510,5 +532,6 @@ export function useConversationState() {
     deleteParticipant,
     resetToSample,
     clearConversation,
+    importCsvTimeline,
   };
 }
